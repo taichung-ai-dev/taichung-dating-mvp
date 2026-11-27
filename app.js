@@ -52,7 +52,7 @@ const demoProfiles = [
         district: '北屯區',
         bio: '每週至少爬一座山！對於任何登山路線都充滿熱情。也喜歡拍攝風景，期待和你一起發現台中美麗的角落。',
         tags: ['登山', '風景攝影', '徒步旅行', '徒步', '爬山'],
-        avatar_url: 'https://i.pravatar.me/150?img=12',
+        avatar_url: 'https://api.dicebear.com/7.x/notionists/svg?seed=大雄',
         isDemo: true
     },
     {
@@ -62,7 +62,7 @@ const demoProfiles = [
         district: '西屯區',
         bio: '熱愛生活，喜歡在周末一起爬山、拍照、吃美食。有一個好的伴侶能讓每一天都更精彩！',
         tags: ['爬山', '運動', '美食', '攝影', '旅行'],
-        avatar_url: 'https://i.pravatar.me/150?img=32',
+        avatar_url: 'https://api.dicebear.com/7.x/notionists/svg?seed=美玉',
         isDemo: true
     },
     {
@@ -72,7 +72,7 @@ const demoProfiles = [
         district: '南屯區',
         bio: '痴迷大自然，周末總是找地方跑。希望找到一個能一起放空、聊天、探索的小夥伴。',
         tags: ['自然', '徒步', '星空愛好者', '喝咖啡', '散步'],
-        avatar_url: 'https://i.pravatar.me/150?img=65',
+        avatar_url: 'https://api.dicebear.com/7.x/notionists/svg?seed=志堅',
         isDemo: true
     },
     {
@@ -82,7 +82,7 @@ const demoProfiles = [
         district: '北區',
         bio: '喜歡用相機記錄每一個細微之處，重視生活的品質。期待遇到有趣的人一起慢跑、拍照、探險。',
         tags: ['攝影', '慢跑', '藝術', '咖啡店', '攝影'],
-        avatar_url: 'https://i.pravatar.me/150?img=98',
+        avatar_url: 'https://api.dicebear.com/7.x/notionists/svg?seed=念媛',
         isDemo: true
     }
 ];
@@ -371,7 +371,7 @@ async function loadProfiles() {
                         district: '北區',
                         bio: '加入台中跑咖，期待與您相遇！',
                         tags: ['跑步', '登山'],
-                        avatar_url: 'https://i.pravatar.me/150?img=55'
+                        avatar_url: 'https://api.dicebear.com/7.x/notionists/svg?seed=新會員'
                     })
                     .select()
                     .single();
@@ -409,7 +409,7 @@ function createProfileCard(profile, isDemo = false) {
     return `
         <div class="bg-white rounded-xl shadow-md overflow-hidden transform transition hover:scale-105 hover:shadow-xl">
             <div class="relative">
-                <img src="${profile.avatar_url}" alt="${profile.nickname}" class="w-full h-48 object-cover">
+                <img src="${profile.avatar_url}" alt="${profile.nickname}" class="w-full h-48 object-cover" onerror="this.src='https://api.dicebear.com/7.x/notionists/svg?seed=預設'">
                 <div class="absolute bottom-2 right-2 bg-white rounded-full px-3 py-1 shadow">
                     <span class="text-sm font-bold text-green-600">${profile.age}歲</span>
                 </div>
