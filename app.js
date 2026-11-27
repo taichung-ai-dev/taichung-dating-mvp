@@ -13,10 +13,17 @@ let supabase = null;
 
 async function initSupabase() {
     try {
-        // 動態引入 @supabase/supabase-js
+        // 嘗試使用全域 SupabaseClient（從 CDN 載入）
+        if (typeof SupabaseClient !== 'undefined') {
+            supabase = new SupabaseClient(supabaseConfig.url, supabaseConfig.publishableKey);
+            console.log('✅ Supabase 初始化成功（使用全域變量）');
+            return true;
+        }
+        
+        // 嘗試動態引入（ES Module）
         const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2');
         supabase = createClient(supabaseConfig.url, supabaseConfig.publishableKey);
-        console.log('✅ Supabase 初始化成功');
+        console.log('✅ Supabase 初始化成功（動態引入）');
         return true;
     } catch (err) {
         console.error('❌ Supabase 初始化失敗:', err);
@@ -128,12 +135,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 顯示初始視圖（訪客體驗）
     showGuestView();
     
-    // 載入角色資料
-    if (state.isGuestMode) {
-        loadGuestProfiles();
-    } else {
-        showAppView();
-    }
+    // 載入角色資料（優先從 Supabase，失敗則使用內建）
+    await loadProfileData();
     
     // 如果有登入，用 Supabase 載入資料
     if (state.currentUser) {
@@ -148,7 +151,7 @@ function setupEventListeners() {
         state.isGuestMode = true;
         showGuestView();
         el.authModal.classList.add('hidden');
-        loadGuestProfiles();
+        loadProfileData();
     });
 
     // 登入按鈕
@@ -239,7 +242,7 @@ function setupEventListeners() {
     // 訪客體驗開始
     el.startExploring.addEventListener('click', () => {
         showGuestView();
-        loadGuestProfiles();
+        loadProfileData();
     });
 
     // 編輯個人資料
@@ -289,9 +292,7 @@ function showAppView() {
 }
 
 // 加載輪播角色資料
-async function loadGuestProfiles() {
-    el.guestProfileGrid.innerHTML = '';
-    
+async function loadProfileData() {
     // 優先嘗試從 Supabase 載入
     if (supabase) {
         try {
@@ -304,8 +305,6 @@ async function loadGuestProfiles() {
             
             if (error) {
                 console.warn('Supabase 載入失敗，將使用內建資料:', error.message);
-                // 載入失敗，切換到內建資料
-                loadGuestProfilesWithDemo();
             } else if (data && data.length > 0) {
                 console.log('✅ 從 Supabase 載入角色:', data.length);
                 el.guestProfileGrid.innerHTML = data.map(profile => 
@@ -315,7 +314,6 @@ async function loadGuestProfiles() {
             }
         } catch (err) {
             console.warn('Supabase 載入錯誤，將使用內建資料:', err.message);
-            loadGuestProfilesWithDemo();
         }
     }
     
@@ -333,7 +331,7 @@ function loadGuestProfilesWithDemo() {
 // 載入個人檔案
 async function loadProfiles() {
     if (state.isGuestMode) {
-        loadGuestProfiles();
+        await loadProfileData();
         return;
     }
 

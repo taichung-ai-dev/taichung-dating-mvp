@@ -163,6 +163,33 @@
         </div>
     </div>
 
+    <!-- 頁面載入完成後初始化 Supabase -->
+    <script>
+        // 確保 Supabase CDN 已載入
+        function loadSupabase() {
+            return new Promise((resolve, reject) => {
+                if (typeof SupabaseClient !== 'undefined') {
+                    resolve(SupabaseClient);
+                } else if (typeof createClient !== 'undefined') {
+                    resolve(createClient);
+                } else {
+                    // 延遲載入
+                    const interval = setInterval(() => {
+                        if (typeof SupabaseClient !== 'undefined') {
+                            clearInterval(interval);
+                            resolve(SupabaseClient);
+                        } else if (typeof createClient !== 'undefined') {
+                            clearInterval(interval);
+                            resolve(createClient);
+                        } else if (document.readyState === 'complete') {
+                            clearInterval(interval);
+                            reject(new Error('Supabase SDK 載入失敗'));
+                        }
+                    }, 100);
+                }
+            });
+        }
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="app.js"></script>
 </body>
