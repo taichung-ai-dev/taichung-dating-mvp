@@ -126,21 +126,28 @@ const el = {
 
 // 初始化
 document.addEventListener('DOMContentLoaded', async () => {
-    // 初始化 Supabase
-    await initSupabase();
-    
-    // 設置事件監聽
-    setupEventListeners();
-    
-    // 顯示初始視圖（訪客體驗）
-    showGuestView();
-    
-    // 載入角色資料（優先從 Supabase，失敗則使用內建）
-    await loadProfileData();
-    
-    // 如果有登入，用 Supabase 載入資料
-    if (state.currentUser) {
-        await loadProfiles();
+    try {
+        // 初始化 Supabase
+        await initSupabase();
+        
+        // 設置事件監聽
+        setupEventListeners();
+        
+        // 顯示初始視圖（訪客體驗）
+        showGuestView();
+        
+        // 載入角色資料（優先從 Supabase，失敗則使用內建）
+        await loadProfileData();
+        
+        // 如果有登入，用 Supabase 載入資料
+        if (state.currentUser) {
+            await loadProfiles();
+        }
+        
+        console.log('✅ MVP 初始化完成');
+    } catch (err) {
+        console.error('❌ MVP 初始化失敗:', err);
+        alert('系統初始化失敗，請重新整理頁面');
     }
 });
 
