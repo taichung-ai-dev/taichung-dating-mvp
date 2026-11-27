@@ -9,25 +9,25 @@ const supabaseConfig = {
 };
 
 // 初始化 Supabase
-let supabase = null;
+let sbClient = null;
 
 async function initSupabase() {
     try {
-        // 嘗試使用全域 SupabaseClient（從 CDN 載入）
-        if (typeof SupabaseClient !== 'undefined') {
-            supabase = new SupabaseClient(supabaseConfig.url, supabaseConfig.publishableKey);
+        // 優先使用全域 SupabaseClient（從 CDN 載入）
+        if (typeof window !== 'undefined' && window.supabase) {
+            sbClient = window.supabase;
             console.log('✅ Supabase 初始化成功（使用全域變量）');
             return true;
         }
         
         // 嘗試動態引入（ES Module）
         const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2');
-        supabase = createClient(supabaseConfig.url, supabaseConfig.publishableKey);
+        sbClient = createClient(supabaseConfig.url, supabaseConfig.publishableKey);
         console.log('✅ Supabase 初始化成功（動態引入）');
         return true;
     } catch (err) {
         console.error('❌ Supabase 初始化失敗:', err);
-        supabase = null;
+        sbClient = null;
         return false;
     }
 }
@@ -209,21 +209,21 @@ function setupEventListeners() {
             return;
         }
 
-        if (!supabase) {
+        if (!sbClient) {
             alert('系統錯誤：Supabase 連線失敗');
             return;
         }
 
         try {
             if (mode === 'signup') {
-                const { data, error } = await supabase.auth.signUp({
+                const { data, error } = await sbClient.auth.signUp({
                     email,
                     password
                 });
                 if (error) throw error;
                 alert('註冊成功！請檢查您的電子郵件並驗證郵箱。');
             } else {
-                const { data, error } = await supabase.auth.signInWithPassword({
+                const { data, error } = await sbClient.auth.signInWithPassword({
                     email,
                     password
                 });
@@ -239,8 +239,8 @@ function setupEventListeners() {
 
     // 登出按鈕
     el.logoutBtn.addEventListener('click', async () => {
-        if (!supabase) return;
-        await supabase.auth.signOut();
+        if (!sbClient) return;
+        await sbClient.auth.signOut();
         state.currentUser = null;
         state.currentProfile = null;
         showGuestView();
@@ -301,9 +301,9 @@ function showAppView() {
 // 加載輪播角色資料
 async function loadProfileData() {
     // 優先嘗試從 Supabase 載入
-    if (supabase) {
-        try {
-            const { data, error } = await supabase
+    if (sbClient) {
+            try {
+            const { data, error } = await sbClient
                 .from('profiles')
                 .select('*')
                 .eq('district', '北屯區')
@@ -345,14 +345,14 @@ async function loadProfiles() {
     if (!state.currentUser) return;
 
     if (!state.currentProfile) {
-        if (!supabase) {
+        if (!sbClient) {
             alert('系統錯誤：Supabase 連線失敗');
             showGuestView();
             return;
         }
 
         try {
-            const { data: profile } = await supabase
+            const { data: profile } = await sbClient
                 .from('profiles')
                 .select('*')
                 .eq('id', state.currentUser.id)
@@ -362,7 +362,7 @@ async function loadProfiles() {
                 state.currentProfile = profile;
                 renderProfileInfo(profile);
             } else {
-                const { data, error } = await supabase
+                const { data, error } = await sbClient
                     .from('profiles')
                     .insert({
                         id: state.currentUser.id,
@@ -466,9 +466,9 @@ async function handleLike(profileId) {
     await sleep(500);
 
     // 檢查是否互相喜歡
-    if (supabase && state.currentUser) {
+    if (sbClient && state.currentUser) {
         try {
-            const { data: chat } = await supabase
+            const { data: chat } = await sbClient
                 .from('likes')
                 .select('*')
                 .eq('from_user_id', state.currentUser.id)
@@ -512,8 +512,8 @@ function showEditProfileModal() {
 
     const tagArray = tags ? tags.split(',').map(t => t.trim()).filter(Boolean) : [];
 
-    if (supabase && state.currentUser) {
-        supabase.from('profiles').update({
+    if (sbClient && state.currentUser) {
+        sbClient.from('profiles').update({
             nickname,
             age: parseInt(age),
             district,
@@ -547,9 +547,9 @@ function showChatModal() {
 
 // 載入聊天訊息
 async function loadChatMessages() {
-    if (state.currentUser && supabase) {
+    if (state.currentUser && sbClient) {
         try {
-            const { data, error } = await supabase
+            const { data, error } = await sbClient
                 .from('messages')
                 .select('*')
                 .or(`sender_id.eq.${state.currentUser.id},receiver_id.eq.${state.currentUser.id}`)
@@ -586,8 +586,8 @@ async function sendMessage() {
     const content = el.chatInput.value.trim();
     if (!content) return;
 
-    if (supabase && state.currentUser) {
-        await supabase.from('messages').insert({
+    if (sbClient && state.currentUser) {
+        await sbClient.from('messages').insert({
             sender_id: state.currentUser.id,
             receiver_id: 'demo_user',
             content: content

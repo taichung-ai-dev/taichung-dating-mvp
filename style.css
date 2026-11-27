@@ -142,6 +142,10 @@ input:focus, textarea:focus {
 }
 
 /* 動畫 */
+/* 隱藏元素 */
+.hidden {
+    display: none !important;
+}
 @keyframes fadeIn {
     from {
         opacity: 0;
