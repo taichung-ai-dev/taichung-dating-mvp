@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>台中週末跑咖 - 戶外配對交友</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gradient-to-br from-green-50 to-emerald-100 min-h-screen">
+    <!-- 導覽列 -->
+    <nav class="bg-white shadow-md">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span class="text-xl font-bold text-green-800">台中跑咖</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button id="guestBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-medium transition">
+                    訪客體驗
+                </button>
+                <button id="loginBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition">
+                    登入
+                </button>
+                <button id="signupBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition">
+                    註冊
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 登入/註冊彈窗 -->
+    <div id="authModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-xl p-8 w-full max-w-md shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800" id="authTitle">登入帳號</h2>
+                <button id="closeAuth" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <form id="authForm" class="space-y-4">
+                <input type="hidden" id="authMode" value="login">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">信箱</label>
+                    <input type="email" id="email" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="your@example.com">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">密碼</label>
+                    <input type="password" id="password" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="輸入密碼">
+                </div>
+                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition">
+                    <span id="submitBtnText">登入</span>
+                </button>
+            </form>
+            <div class="mt-4 text-center">
+                <button id="toggleAuthMode" class="text-sm text-green-600 hover:underline">
+                    還不是會員？立即註冊
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主內容 -->
+    <main class="max-w-6xl mx-auto px-4 py-8">
+        <!-- 訪客體驗 -->
+        <div id="guestView" class="space-y-8">
+            <div class="text-center py-12">
+                <h1 class="text-5xl font-bold text-gray-800 mb-4">歡迎來到台中跑咖 🏃‍♂️</h1>
+                <p class="text-xl text-gray-600 mb-8">探索台中附近的登山好去處，一起找到你的跑友</p>
+                <button id="startExploring" class="bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-xl text-xl transition transform hover:scale-105">
+                    開始自由體驗
+                </button>
+            </div>
+
+            <h2 class="text-2xl font-bold text-gray-800 text-center">臺中主題配對角色</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6" id="guestProfileGrid">
+                <!-- Profile cards will be inserted here -->
+            </div>
+        </div>
+
+        <!-- 登入後的主介面 -->
+        <div id="appView" class="hidden space-y-8">
+            <div class="flex justify-between items-center">
+                <h1 class="text-3xl font-bold text-gray-800">探索新的朋友</h1>
+                <button id="logoutBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition">
+                    登出
+                </button>
+            </div>
+
+            <!-- 個人資訊卡片 -->
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">我的個人資訊</h2>
+                <div id="profileInfo" class="space-y-3">
+                    <div class="flex items-center space-x-3">
+                        <img id="avatarPreview" class="w-16 h-16 rounded-full object-cover" src="" alt="頭像">
+                        <div>
+                            <p class="font-bold text-gray-800" id="memberNickname"></p>
+                            <p class="text-sm text-gray-500" id="memberDistrict"></p>
+                            <p class="text-sm text-gray-500" id="memberAge"></p>
+                        </div>
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        <p class="font-medium mb-1">興趣標籤</p>
+                        <div id="memberTags" class="flex flex-wrap gap-2"></div>
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        <p class="font-medium mb-1">自我介紹</p>
+                        <p id="memberBio" class="text-gray-600"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center">
+                <button id="editProfileBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition">
+                    ✏️ 編輯個人資料
+                </button>
+                <button id="chatBtn" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition">
+                    💬 即時聊天室
+                </button>
+            </div>
+
+            <h2 class="text-2xl font-bold text-gray-800">正在探索</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6" id="profileGrid">
+                <!-- Profile cards will be inserted here -->
+            </div>
+        </div>
+    </main>
+
+    <!-- 聊天室彈窗 -->
+    <div id="chatModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-xl w-full max-w-2xl h-3/4 flex flex-col shadow-2xl">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h2 class="text-xl font-bold text-gray-800">即時聊天室</h2>
+                <button id="closeChat" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-4">
+                <!-- Messages will be inserted here -->
+            </div>
+            <div class="p-4 border-t">
+                <div class="flex space-x-4">
+                    <input id="chatInput" class="flex-1 border border-gray-300 rounded-lg px-4 py-2" placeholder="輸入訊息...">
+                    <button id="sendMessage" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition">
+                        發送
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 配對成功彈窗 -->
+    <div id="matchModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-xl p-8 text-center shadow-2xl">
+            <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+            </div>
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">配對成功！</h2>
+            <p class="text-gray-600 mb-6">你和 <span id="matchedNickname" class="font-bold text-green-600"></span> 都喜歡對方，開始一段新的旅程吧！</p>
+            <button id="closeMatch" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg transition">
+                開始聊天
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="app.js"></script>
+</body>
+</html>

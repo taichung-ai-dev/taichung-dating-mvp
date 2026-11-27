@@ -1,0 +1,16 @@
+# 敏感資訊
+.env
+*.env
+credentials.json
+*.key
+*.pem
+
+# Supabase 配置
+supabase/config.toml
+*.orig
+
+# 臨時檔案
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
