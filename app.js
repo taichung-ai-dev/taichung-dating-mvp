@@ -2,14 +2,28 @@
 // 台中週末跑咖 - 戶外配對交友系統
 // ============================================================
 
-// Supabase 配置（來自 AGENT_IDENTITIES.json）
+// Supabase 配置
 const supabaseConfig = {
     url: 'https://kvicwvqirfygnvqrzhah.supabase.co',
     publishableKey: 'sb_publishable_f0zl8u-g5aUnvODo_UoQlg_Io7dRsA3'
 };
 
 // 初始化 Supabase
-let supabase = supabaseClient(supabaseConfig.url, supabaseConfig.publishableKey);
+let supabase = null;
+
+async function initSupabase() {
+    try {
+        // 動態引入 @supabase/supabase-js
+        const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2');
+        supabase = createClient(supabaseConfig.url, supabaseConfig.publishableKey);
+        console.log('✅ Supabase 初始化成功');
+        return true;
+    } catch (err) {
+        console.error('❌ Supabase 初始化失敗:', err);
+        supabase = null;
+        return false;
+    }
+}
 
 // 狀態管理
 const state = {
@@ -104,14 +118,27 @@ const el = {
 };
 
 // 初始化
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    // 初始化 Supabase
+    await initSupabase();
+    
+    // 設置事件監聽
     setupEventListeners();
+    
+    // 顯示初始視圖（訪客體驗）
+    showGuestView();
+    
+    // 載入角色資料
     if (state.isGuestMode) {
-        showGuestView();
+        loadGuestProfiles();
     } else {
         showAppView();
     }
-    loadProfiles();
+    
+    // 如果有登入，用 Supabase 載入資料
+    if (state.currentUser) {
+        await loadProfiles();
+    }
 });
 
 // 事件監聽
@@ -121,6 +148,7 @@ function setupEventListeners() {
         state.isGuestMode = true;
         showGuestView();
         el.authModal.classList.add('hidden');
+        loadGuestProfiles();
     });
 
     // 登入按鈕
@@ -171,6 +199,11 @@ function setupEventListeners() {
             return;
         }
 
+        if (!supabase) {
+            alert('系統錯誤：Supabase 連線失敗');
+            return;
+        }
+
         try {
             if (mode === 'signup') {
                 const { data, error } = await supabase.auth.signUp({
@@ -187,7 +220,7 @@ function setupEventListeners() {
                 if (error) throw error;
                 state.currentUser = data.user;
                 showAppView();
-                loadProfiles();
+                await loadProfiles();
             }
         } catch (err) {
             alert('發生錯誤: ' + err.message);
@@ -196,6 +229,7 @@ function setupEventListeners() {
 
     // 登出按鈕
     el.logoutBtn.addEventListener('click', async () => {
+        if (!supabase) return;
         await supabase.auth.signOut();
         state.currentUser = null;
         state.currentProfile = null;
@@ -206,13 +240,6 @@ function setupEventListeners() {
     el.startExploring.addEventListener('click', () => {
         showGuestView();
         loadGuestProfiles();
-    });
-
-    // 登出按鈕
-    el.logoutBtn.addEventListener('click', async () => {
-        await supabase.auth.signOut();
-        state.currentUser = null;
-        showGuestView();
     });
 
     // 編輯個人資料
@@ -264,6 +291,41 @@ function showAppView() {
 // 加載輪播角色資料
 async function loadGuestProfiles() {
     el.guestProfileGrid.innerHTML = '';
+    
+    // 優先嘗試從 Supabase 載入
+    if (supabase) {
+        try {
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('district', '北屯區')
+                .or('district.eq.西屯區,district.eq.南屯區,district.eq.北區')
+                .limit(4);
+            
+            if (error) {
+                console.warn('Supabase 載入失敗，將使用內建資料:', error.message);
+                // 載入失敗，切換到內建資料
+                loadGuestProfilesWithDemo();
+            } else if (data && data.length > 0) {
+                console.log('✅ 從 Supabase 載入角色:', data.length);
+                el.guestProfileGrid.innerHTML = data.map(profile => 
+                    createProfileCard(profile, true)
+                ).join('');
+                return;
+            }
+        } catch (err) {
+            console.warn('Supabase 載入錯誤，將使用內建資料:', err.message);
+            loadGuestProfilesWithDemo();
+        }
+    }
+    
+    // 沒有 Supabase 或載入失敗，使用內建資料
+    loadGuestProfilesWithDemo();
+}
+
+// 載入內建示範角色
+function loadGuestProfilesWithDemo() {
+    el.guestProfileGrid.innerHTML = '';
     const profileCards = demoProfiles.map(profile => createProfileCard(profile, true));
     el.guestProfileGrid.innerHTML = profileCards.join('');
 }
@@ -278,37 +340,47 @@ async function loadProfiles() {
     if (!state.currentUser) return;
 
     if (!state.currentProfile) {
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', state.currentUser.id)
-            .single();
+        if (!supabase) {
+            alert('系統錯誤：Supabase 連線失敗');
+            showGuestView();
+            return;
+        }
 
-        if (profile) {
-            state.currentProfile = profile;
-            renderProfileInfo(profile);
-        } else {
-            // 創建新 profile
-            const { data, error } = await supabase
+        try {
+            const { data: profile } = await supabase
                 .from('profiles')
-                .insert({
-                    id: state.currentUser.id,
-                    nickname: '新會員',
-                    age: 25,
-                    district: '北區',
-                    bio: '加入台中跑咖，期待與您相遇！',
-                    tags: ['跑步', '登山'],
-                    avatar_url: 'https://i.pravatar.me/150?img=55'
-                })
-                .select()
+                .select('*')
+                .eq('id', state.currentUser.id)
                 .single();
 
-            if (error) {
-                console.error('Error creating profile:', error);
+            if (profile) {
+                state.currentProfile = profile;
+                renderProfileInfo(profile);
             } else {
-                state.currentProfile = data;
-                renderProfileInfo(data);
+                const { data, error } = await supabase
+                    .from('profiles')
+                    .insert({
+                        id: state.currentUser.id,
+                        nickname: '新會員',
+                        age: 25,
+                        district: '北區',
+                        bio: '加入台中跑咖，期待與您相遇！',
+                        tags: ['跑步', '登山'],
+                        avatar_url: 'https://i.pravatar.me/150?img=55'
+                    })
+                    .select()
+                    .single();
+
+                if (error) {
+                    console.error('Error creating profile:', error);
+                } else {
+                    state.currentProfile = data;
+                    renderProfileInfo(data);
+                }
             }
+        } catch (err) {
+            console.error('Error loading profile:', err);
+            alert('載入資料失敗，請重新整理頁面');
         }
     }
 
@@ -389,14 +461,23 @@ async function handleLike(profileId) {
     await sleep(500);
 
     // 檢查是否互相喜歡
-    const { data: chat } = await supabase
-        .from('likes')
-        .select('*')
-        .eq('from_user_id', state.currentUser?.id)
-        .eq('to_user_id', 'demo_user');
+    if (supabase && state.currentUser) {
+        try {
+            const { data: chat } = await supabase
+                .from('likes')
+                .select('*')
+                .eq('from_user_id', state.currentUser.id)
+                .eq('to_user_id', 'demo_user');
 
-    if (chat && chat.length > 0) {
-        showMatchModal();
+            if (chat && chat.length > 0) {
+                showMatchModal();
+            } else {
+                alert('已送出喜歡信，對方收到後會通知您喔！');
+            }
+        } catch (err) {
+            console.error('Error checking likes:', err);
+            alert('已送出喜歡信，對方收到後會通知您喔！');
+        }
     } else {
         alert('已送出喜歡信，對方收到後會通知您喔！');
     }
@@ -426,7 +507,7 @@ function showEditProfileModal() {
 
     const tagArray = tags ? tags.split(',').map(t => t.trim()).filter(Boolean) : [];
 
-    if (typeof supabase !== 'undefined') {
+    if (supabase && state.currentUser) {
         supabase.from('profiles').update({
             nickname,
             age: parseInt(age),
@@ -461,30 +542,37 @@ function showChatModal() {
 
 // 載入聊天訊息
 async function loadChatMessages() {
-    if (state.currentUser) {
-        const { data, error } = await supabase
-            .from('messages')
-            .select('*')
-            .or(`sender_id.eq.${state.currentUser.id},receiver_id.eq.${state.currentUser.id}`)
-            .order('created_at', { ascending: false })
-            .limit(50);
+    if (state.currentUser && supabase) {
+        try {
+            const { data, error } = await supabase
+                .from('messages')
+                .select('*')
+                .or(`sender_id.eq.${state.currentUser.id},receiver_id.eq.${state.currentUser.id}`)
+                .order('created_at', { ascending: false })
+                .limit(50);
 
-        if (error) {
-            console.error('Error loading messages:', error);
-            el.chatMessages.innerHTML = '<p class="text-red-500">載入訊息失敗</p>';
-        } else {
-            el.chatMessages.innerHTML = data.map(msg => `
-                <div class="flex ${msg.sender_id === state.currentUser.id ? 'justify-end' : 'justify-start'} mb-2">
-                    <div class="max-w-xs bg-white rounded-lg shadow p-3 ${msg.sender_id === state.currentUser.id ? 'ml-auto' : ''}">
-                        <p class="text-xs text-gray-500 mb-1">
-                            ${msg.sender_id === state.currentUser.id ? '你' : '對方'}
-                            <span class="text-xs">${new Date(msg.created_at).toLocaleTimeString()}</span>
-                        </p>
-                        <p class="text-sm">${msg.content}</p>
+            if (error) {
+                console.error('Error loading messages:', error);
+                el.chatMessages.innerHTML = '<p class="text-red-500">載入訊息失敗</p>';
+            } else {
+                el.chatMessages.innerHTML = data.map(msg => `
+                    <div class="flex ${msg.sender_id === state.currentUser.id ? 'justify-end' : 'justify-start'} mb-2">
+                        <div class="max-w-xs bg-white rounded-lg shadow p-3 ${msg.sender_id === state.currentUser.id ? 'ml-auto' : ''}">
+                            <p class="text-xs text-gray-500 mb-1">
+                                ${msg.sender_id === state.currentUser.id ? '你' : '對方'}
+                                <span class="text-xs">${new Date(msg.created_at).toLocaleTimeString()}</span>
+                            </p>
+                            <p class="text-sm">${msg.content}</p>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
+            }
+        } catch (err) {
+            console.error('Error loading messages:', err);
+            el.chatMessages.innerHTML = '<p class="text-red-500">載入訊息失敗</p>';
         }
+    } else {
+        el.chatMessages.innerHTML = '<p class="text-gray-500">請先登入以查看訊息</p>';
     }
 }
 
@@ -493,7 +581,7 @@ async function sendMessage() {
     const content = el.chatInput.value.trim();
     if (!content) return;
 
-    if (typeof supabase !== 'undefined' && state.currentUser) {
+    if (supabase && state.currentUser) {
         await supabase.from('messages').insert({
             sender_id: state.currentUser.id,
             receiver_id: 'demo_user',
