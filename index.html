@@ -168,10 +168,10 @@
                         </optgroup>
                         <optgroup label="特殊地理館">
                             <option value="POLAR_BEACON">極地孤獨燈塔圈</option>
-                            <option value="KR_OPTIN">朝鮮安全池</option>
-                            <option value="GLOBAL_ANON">匿名保護池</option>
-                            <option value="CN_OPEN">大陸開放池</option>
-                            <option value="SEA_SHARED">海域交流池</option>
+                            <option value="PUBLIC_STABLE">穩定體制安全感圈</option>
+                            <option value="NIGHT_OWL">深夜微光夜行者</option>
+                            <option value="CREATIVE_SOUL">創意美學靈魂派</option>
+                            <option value="PET_LOVERS">毛孩爸媽鏟屎官聯盟</option>
                         </optgroup>
                         <optgroup label="創作者社群">
                             <option value="CREATOR">創作者社群</option>
@@ -201,7 +201,51 @@
                 <button class="back-btn" id="closeCircleSelect">&times;</button>
             </div>
             <div class="modal-body">
-                <div id="circleList"></div>
+                <select id="circleSelect2" class="dropdown-select w-full border border-gray-300 rounded-lg px-4 py-3" required style="width:100%;">
+        <option value="">—— 請選擇生活圈層 ——</option>
+        <optgroup label="銀髮樂齡館">
+            <option value="SENIOR_GOLD">樂齡黃昏青春圈</option>
+            <option value="SENIOR_CRAFT">銀髮工藝圈</option>
+            <option value="SENIOR_FIT">銀髮運動圈</option>
+            <option value="SENIOR_GARDEN">銀髮園藝圈</option>
+            <option value="SENIOR_SOCIETY">銀髮友善圈</option>
+        </optgroup>
+        <optgroup label="校園新手館">
+            <option value="UNI_ROOKIE">校園戀愛新手村</option>
+            <option value="UNI_PARTY">校園派對社</option>
+            <option value="UNI_STUDY">校園學習部</option>
+            <option value="UNI_ART">校園文藝社</option>
+            <option value="UNI_SPORTS">校園運動社</option>
+        </optgroup>
+        <optgroup label="高壓精英館">
+            <option value="TECH_DEV">科技爆幹研發圈</option>
+            <option value="TECH_SALES">科技行銷圈</option>
+            <option value="MED_SHIFT">輪班制白衣天使</option>
+            <option value="MED_ADMIN">醫療行政圈</option>
+            <option value="FINANCE_TECH">金融科技圈</option>
+        </optgroup>
+        <optgroup label="生活共鳴館">
+            <option value="ACG_CORE">硬核二次元同好圈</option>
+            <option value="FOODIE">美食探索者</option>
+            <option value="TRAVELER">自由旅行者</option>
+            <option value="CARLIFE">車輪人生</option>
+            <option value="BOOKWORM">書劫鐵匠</option>
+        </optgroup>
+        <optgroup label="特殊地理館">
+            <option value="POLAR_BEACON">極地孤獨燈塔圈</option>
+            <option value="PUBLIC_STABLE">穩定體制安全感圈</option>
+            <option value="NIGHT_OWL">深夜微光夜行者</option>
+            <option value="CREATIVE_SOUL">創意美學靈魂派</option>
+            <option value="PET_LOVERS">毛孩爸媽鏟屎官聯盟</option>
+        </optgroup>
+        <optgroup label="創作者社群">
+            <option value="CREATOR">創作者社群</option>
+            <option value="VOLUNTEER">志工輪迴</option>
+            <option value="MOVIE_BAUD">影音劇迷圈</option>
+            <option value="SPORTS_DIVERSE">運動多樣者</option>
+            <option value="BREAKFAST_CLUB">早餐與美食俱樂部</option>
+        </optgroup>
+    </select>
             </div>
             <div class="modal-footer p-4 border-t">
                 <button id="confirmCircleSelect" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg">確認並加入</button>
@@ -324,7 +368,7 @@
                 if(typeof createClient!=='undefined'){ sbClient = createClient(SUPABASE_URL, SUPABASE_KEY); console.log('✅ Supabase 初始化成功（動態引入）'); return true; }
                 return false;
             }catch(err){
-                console.error('❌ Supabase 初始化失敗:', err);
+                console.error('❌ Supabase 初始化錯誤:', err);
                 sbClient = null;
                 return false;
             }
@@ -367,10 +411,10 @@
             { circle_code:'CARLIFE', category_group:'生活共鳴館', display_name_zh: '車輪人生', display_name_en:'Car Life' },
             { circle_code:'BOOKWORM', category_group:'生活共鳴館', display_name_zh: '書劫鐵匠', display_name_en:'Bookworm' },
             { circle_code:'POLAR_BEACON', category_group:'特殊地理館', display_name_zh: '極地孤獨燈塔圈', display_name_en:'Polar Expedition Beacon' },
-            { circle_code:'KR_OPTIN', category_group:'特殊地理館', display_name_zh: '朝鮮安全池', display_name_en:'Korea Safe Pool' },
-            { circle_code:'GLOBAL_ANON', category_group:'特殊地理館', display_name_zh: '匿名保護池', display_name_en:'Global Anonymity Pool' },
-            { circle_code:'CN_OPEN', category_group:'特殊地理館', display_name_zh: '大陸開放池', display_name_en:'China Open Pool' },
-            { circle_code:'SEA_SHARED', category_group:'特殊地理館', display_name_zh: '海域交流池', display_name_en:'Sea Shared Pool' },
+            { circle_code:'PUBLIC_STABLE', category_group:'特殊地理館', display_name_zh: '穩定體制安全感圈', display_name_en:'Korea Safe Pool' },
+            { circle_code:'NIGHT_OWL', category_group:'特殊地理館', display_name_zh: '深夜微光夜行者', display_name_en:'Global Anonymity Pool' },
+            { circle_code:'CREATIVE_SOUL', category_group:'特殊地理館', display_name_zh: '創意美學靈魂派', display_name_en:'China Open Pool' },
+            { circle_code:'PET_LOVERS', category_group:'特殊地理館', display_name_zh: '毛孩爸媽鏟屎官聯盟', display_name_en:'Sea Shared Pool' },
             { circle_code:'CREATOR', category_group:'創作者社群', display_name_zh: '創作者社群', display_name_en:'Creator Community' },
             { circle_code:'VOLUNTEER', category_group:'創作者社群', display_name_zh: '志工輪迴', display_name_en:'Volunteer Rotation' },
             { circle_code:'MOVIE_BAUD', category_group:'創作者社群', display_name_zh: '影音劇迷圈', display_name_en:'Movie & Poetry' },
@@ -394,7 +438,7 @@
                 }
                 console.log('✅ MVP 初始化完成');
             }catch(err){
-                console.error('❌ MVP 初始化失敗:', err);
+                console.error('❌ MVP 初始化錯誤:', err);
             }
         });
 
@@ -469,7 +513,7 @@
             document.getElementById('confirmCircleSelect')?.addEventListener('click',confirmCircleSelect);
             document.getElementById('closeCircleSelect')?.addEventListener('click',()=>{
                 document.getElementById('circleSelectModal').classList.add('hidden');
-                document.getElementById('circleSelectModal').innerHTML = '<div class="modal-header"><h2 class="text-2xl font-bold text-gray-800">選擇您的生活圈層</h2><button class="back-btn" id="closeCircleSelect2">&times;</button></div><div id="circleList"></div>';
+                document.getElementById('circleSelectModal').innerHTML = '<div class="modal-header"><h2 class="text-2xl font-bold text-gray-800">選擇您的生活圈層</h2><button class="back-btn" id="closeCircleSelect2">&times;</button></div>';
                 renderCircleList();
             });
         }
@@ -1082,7 +1126,7 @@
                     provider: 'google',
                     options: { redirectTo: 'https://taichung-ai-dev.github.io/taichung-dating-mvp/' }
                 });
-                if(error){ alert('Google 登入失敗：' + error.message); }
+                if(error){ alert('登入錯誤：' + error.message); }
             }catch(e){ alert('Google 登入失敗：' + e.message); }
         }
 
@@ -1093,7 +1137,7 @@
                     provider: 'facebook',
                     options: { redirectTo: 'https://taichung-ai-dev.github.io/taichung-dating-mvp/' }
                 });
-                if(error){ alert('Facebook 登入失敗：' + error.message); }
+                if(error){ alert('登入錯誤：' + error.message); }
             }catch(e){ alert('Facebook 登入失敗：' + e.message); }
         }
 
@@ -1109,7 +1153,7 @@
                     <button class="back-btn" id="closeCircleSelect">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <div id="circleList"></div>
+                    
                 </div>
                 <div class="modal-footer p-4 border-t">
                     <button id="confirmCircleSelect" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg">確認並加入</button>
