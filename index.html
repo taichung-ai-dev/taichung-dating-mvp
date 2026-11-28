@@ -45,14 +45,10 @@
         .tab-btn.active{ background:var(--primary); color:#fff; border-color:var(--primary); }
         .tab-btn:hover:not(.active){ background:#f0fdf4; border-color:#86efac; }
         .dropdown-select{ appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; padding-right:40px; cursor:pointer; }
-        .debug-block{ background:#1a1a2e; color:#00ff00; padding:16px; border-radius:8px; font-family:'Courier New',monospace; font-size:.8rem; white-space:pre-wrap; max-height:300px; overflow-y:auto; margin-top:8px; }
-        .error-block{ background:#fef2f2; color:#b91c1c; padding:12px; border-radius:8px; font-size:.9rem; border:1px solid #fecaca; }
-        .show-error{ border-color:#ef4444; background:#fef2f2; }
         .password-toggle{ position:relative; }
         .password-toggle input{ padding-right:100px; }
         .password-toggle .toggle-icon{ position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer; color:#6b7280; }
         .circle-group-header{ font-weight:700; color:#1f2937; padding:8px 12px; background:#f0fdf4; border:1px solid #86efac; border-radius:8px; cursor:pointer; }
-        .select-option{ padding:10px 16px; font-size:1rem; }
 
         /* 圈層選擇彈窗 */
         #circleSelectModal { backdrop-filter:blur(8px); background:rgba(255,255,255,.95); }
@@ -142,6 +138,48 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">生活圈層 <span class="text-red-500">*</span></label>
                     <select id="circleSelect" class="dropdown-select w-full border border-gray-300 rounded-lg px-4 py-3" required>
                         <option value="">—— 請選擇生活圈層 ——</option>
+                        <optgroup label="銀髮樂齡館">
+                            <option value="SENIOR_GOLD">樂齡黃昏青春圈</option>
+                            <option value="SENIOR_CRAFT">銀髮工藝圈</option>
+                            <option value="SENIOR_FIT">銀髮運動圈</option>
+                            <option value="SENIOR_GARDEN">銀髮園藝圈</option>
+                            <option value="SENIOR_SOCIETY">銀髮友善圈</option>
+                        </optgroup>
+                        <optgroup label="校園新手館">
+                            <option value="UNI_ROOKIE">校園戀愛新手村</option>
+                            <option value="UNI_PARTY">校園派對社</option>
+                            <option value="UNI_STUDY">校園學習部</option>
+                            <option value="UNI_ART">校園文藝社</option>
+                            <option value="UNI_SPORTS">校園運動社</option>
+                        </optgroup>
+                        <optgroup label="高壓精英館">
+                            <option value="TECH_DEV">科技爆肝研發圈</option>
+                            <option value="TECH_SALES">科技行銷圈</option>
+                            <option value="MED_SHIFT">輪班制白衣天使</option>
+                            <option value="MED_ADMIN">醫療行政圈</option>
+                            <option value="FINANCE_TECH">金融科技圈</option>
+                        </optgroup>
+                        <optgroup label="生活共鳴館">
+                            <option value="ACG_CORE">硬核二次元同好圈</option>
+                            <option value="FOODIE">美食探索者</option>
+                            <option value="TRAVELER">自由旅行者</option>
+                            <option value="CARLIFE">車輪人生</option>
+                            <option value="BOOKWORM">書劫鐵匠</option>
+                        </optgroup>
+                        <optgroup label="特殊地理館">
+                            <option value="POLAR_BEACON">極地孤獨燈塔圈</option>
+                            <option value="KR_OPTIN">朝鮮安全池</option>
+                            <option value="GLOBAL_ANON">匿名保護池</option>
+                            <option value="CN_OPEN">大陸開放池</option>
+                            <option value="SEA_SHARED">海域交流池</option>
+                        </optgroup>
+                        <optgroup label="創作者社群">
+                            <option value="CREATOR">創作者社群</option>
+                            <option value="VOLUNTEER">志工輪迴</option>
+                            <option value="MOVIE_BAUD">影音劇迷圈</option>
+                            <option value="SPORTS_DIVERSE">運動多樣者</option>
+                            <option value="BREAKFAST_CLUB">早餐與美食俱樂部</option>
+                        </optgroup>
                     </select>
                 </div>
                 <div id="formError" class="text-red-500 text-sm hidden"></div>
@@ -340,14 +378,13 @@
             { circle_code:'BREAKFAST_CLUB', category_group:'創作者社群', display_name_zh: '早餐與美食俱樂部', display_name_en:'Breakfast Club' }
         ];
 
-        // ─── 初始化 (修正: 移除所有 alert，訪客模式絕不跳彈窗) ──
+        // ─── 初始化 (修正: 移除所有系統錯誤 alert 彈窗，改用 console) ──
         document.addEventListener('DOMContentLoaded',async()=>{
             try{
                 await initSupabase();
                 setupEventListeners();
                 showGuestView();
-                await loadCircles();  // 直接渲染 30 個圈層（本地備援），後續再同步
-                // 訪客模式：不讀取任何需要登入權限的資料表
+                await loadCircles();
                 if(state.currentUser){
                     await loadRoleData();
                     await refreshApp();
@@ -484,7 +521,7 @@
             const select = document.getElementById('circleSelect');
             if(!select) return;
 
-            // 1. 直接用本地 30 個備援渲染（100% 保證有選項）
+            // 1. 直接用本地 30 個備援渲染
             const groups = {};
             BUILTIN_CIRCLES.forEach(c=>{
                 if(!groups[c.category_group]) groups[c.category_group] = [];
@@ -521,7 +558,6 @@
                                 display_name_zh: c.display_name?.zh_TW || c.display_name?.zh || c.circle_code
                             });
                         });
-                        // 清空後重新填入
                         const newSelect = document.createElement('select');
                         newSelect.id = 'circleSelect';
                         newSelect.className = 'dropdown-select w-full border border-gray-300 rounded-lg px-4 py-3';
@@ -538,7 +574,6 @@
                             });
                             select.appendChild(optGroup);
                         });
-                        // 替換原 select
                         select.parentNode.replaceChild(newSelect, select);
                     }
                 }catch(err){
@@ -783,7 +818,7 @@
                     <div class="bg-white rounded-xl shadow-md p-5 card-hover">
                         <div class="flex gap-4">
                             <div class="avatar w-14 h-14 rounded-full overflow-hidden flex-shrink-0">
-                                <img src="${p.author_id===state.currentUser?.id?'https://api.dicebear.com/7.x/notionists/svg?seed=預設':(p.avatar_url||'https://api.dicebear.com/7.x/notionists/svg?seed=預設')}" alt="頭像" onerror="this.src='https://api.dicebear.com/7.x/notionists/svg?seed=預設'">
+                                <img src="${p.author_id===state.currentUser?.id?'https://api.dicebear.com/7.x/notionists/svg?seed=預設':(p.avatar_url||'https://api.dicebear.com/7.x/notionists/svg?seed=預定')}" alt="頭像" onerror="this.src='https://api.dicebear.com/7.x/notionists/svg?seed=預設'">
                             </div>
                             <div class="flex-1 min-w-0">
                                 <div class="flex justify-between items-center mb-2">
@@ -972,7 +1007,6 @@
             const nickname = document.getElementById('nicknameInput').value.trim();
             const circle = document.getElementById('circleSelect').value;
 
-            // 密碼一致性
             if(mode==='signup' && password !== passwordConfirm){
                 const errEl = document.getElementById('passwordError');
                 errEl.classList.remove('hidden');
@@ -980,14 +1014,12 @@
                 document.getElementById('passwordConfirm').focus();
                 return;
             }
-            // 暱稱
             if(!nickname){
                 document.getElementById('formError').textContent = '⚠️ 請輸入暱稱';
                 document.getElementById('formError').classList.remove('hidden');
                 document.getElementById('nicknameInput').focus();
                 return;
             }
-            // 生活圈層必選
             if(!circle){
                 document.getElementById('formError').textContent = '⚠️ 生活圈層為必填項目';
                 document.getElementById('formError').classList.remove('hidden');
@@ -1041,7 +1073,7 @@
             }
         }
 
-        // ─── 洽谷登入 ───────────────────────────────────────────
+        // ─── 社交登入 ───────────────────────────────────────────
         async function onGoogleLogin(){
             if(!sbClient){ alert('尚未載入 Supabase SDK，請稍後再試'); return; }
             try{
@@ -1133,7 +1165,7 @@
                 const {error} = await sbClient.from('users_profile').upsert({
                     id: state.currentUser.id,
                     nickname: state.currentProfile?.nickname || '新會員',
-                    avater_url: state.currentProfile?.avater_url ||
+                    avatar_url: state.currentProfile?.avatar_url ||
                         `https://api.dicebear.com/7.x/notionists/svg?seed=${state.currentUser.id}`,
                     iso_country_code: 'TW',
                     current_city: 'Taichung',
