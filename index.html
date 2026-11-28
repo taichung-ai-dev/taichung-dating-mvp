@@ -41,11 +41,13 @@
         .tab-btn.active{ background:var(--primary); color:#fff; border-color:var(--primary); }
         .tab-btn:hover:not(.active){ background:#f0fdf4; border-color:#86efac; }
         .dropdown-select{ appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; padding-right:40px; cursor:pointer; }
+        .debug-block{ background:#1a1a2e; color:#00ff00; padding:16px; border-radius:8px; font-family:'Courier New',monospace; font-size:.8rem; white-space:pre-wrap; max-height:300px; overflow-y:auto; margin-top:8px; }
+        .error-toast{ position:fixed; bottom:20px; right:20px; background:#ef4444; color:#fff; padding:12px 20px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,.2); z-index:9999; max-width:400px; font-size:.9rem; }
     </style>
 </head>
 <body class="min-h-screen">
 
-    <!-- ─── 導覽列 ─── -->
+    <!-- 導覽列 -->
     <nav class="bg-white shadow-sm sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center space-x-2">
@@ -60,7 +62,7 @@
         </div>
     </nav>
 
-    <!-- ─── 登入／註冊彈窗 ─── -->
+    <!-- 登入／註冊彈窗 -->
     <div id="authModal" class="modal-overlay fixed inset-0 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl slide-in">
             <div class="flex justify-between items-center mb-6">
@@ -89,7 +91,7 @@
         </div>
     </div>
 
-    <!-- ─── 主內容區 ─── -->
+    <!-- 訪客體驗 -->
     <main class="max-w-7xl mx-auto px-4 py-8">
         <section id="guestView" class="space-y-10 fade-in">
             <div class="text-center py-12">
@@ -104,6 +106,7 @@
             </div>
         </section>
 
+        <!-- 登入後介面 -->
         <section id="appView" class="hidden space-y-10 fade-in">
             <div class="flex justify-between items-center">
                 <h1 class="text-3xl font-bold text-gray-800">探索夥伴</h1>
@@ -128,7 +131,6 @@
                     <button id="postsBtn" class="btn-outline px-4 py-2 rounded-lg">📸 動態牆</button>
                 </div>
             </div>
-
             <div class="space-y-8">
                 <div class="flex justify-between items-center"><h2 class="text-2xl font-bold text-gray-800">正在探索</h2><span class="text-sm text-gray-500">快看眼前這幾位！</span></div>
                 <div id="profileGrid" class="role-grid"></div>
@@ -136,7 +138,7 @@
         </section>
     </main>
 
-    <!-- ─── 聊天室彈窗 ─── -->
+    <!-- 聊天室彈窗 -->
     <div id="chatModal" class="modal-overlay fixed inset-0 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-2xl w-full max-w-3xl h-3/4 flex flex-col shadow-2xl slide-in">
             <div class="flex justify-between items-center p-4 border-b flex-wrap gap-2"><h2 class="text-xl font-bold text-gray-800">💬 即時聊天室</h2><button id="closeChat" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button></div>
@@ -148,19 +150,19 @@
         </div>
     </div>
 
-    <!-- ─── 動態牆彈窗 ─── -->
+    <!-- 動態牆彈窗 -->
     <div id="postsModal" class="modal-overlay fixed inset-0 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-2xl w-full max-w-4xl h-4/5 flex flex-col shadow-2xl slide-in">
             <div class="flex justify-between items-center p-4 border-b flex-wrap gap-2"><h2 class="text-xl font-bold text-gray-800">📸 圈層動態牆</h2><button id="closePosts" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button></div>
             <div id="postsList" class="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-hide"></div>
             <div class="p-4 border-t flex space-x-3">
-                <input id="postInput" class="flex-1 border border-gray-300 rounded-lg px-4 py-3" placeholder="發布一則動態…可以描述你在做什麼、拍的風景、看到的好東西" maxlength="500">
+                <input id="postInput" class="flex-1 border border-gray-300 rounded-lg px-4 py-3" placeholder="發布一則動態…" maxlength="500">
                 <button id="postButton" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium">發布</button>
             </div>
         </div>
     </div>
 
-    <!-- ─── 配對成功彈窗 ─── -->
+    <!-- 配對成功彈窗 -->
     <div id="matchModal" class="modal-overlay fixed inset-0 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-2xl p-8 text-center shadow-2xl max-w-md mx-4 slide-in">
             <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6"><svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></div>
@@ -174,37 +176,685 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="app.js"></script>
     <script>
-        function loadSupabase(){return new Promise((resolve, reject)=>{if(typeof SupabaseClient!=='undefined'){resolve(SupabaseClient)}else if(typeof createClient!=='undefined'){resolve(createClient)}else{const interval=setInterval(()=>{if(typeof SupabaseClient!=='undefined'){clearInterval(interval);resolve(SupabaseClient)}else if(typeof createClient!=='undefined'){clearInterval(interval);resolve(createClient)}else if(document.readyState==='complete'){clearInterval(interval);reject(new Error('Supabase SDK 載入失敗'))}},100)}});}
-        let sbClient=null; const SUPABASE_URL='https://kvicwvqirfygnvqrzhah.supabase.co'; const SUPABASE_KEY='sb_publishable_f0zl8u-g5aUnvODo_UoQlg_Io7dRsA3';
-        async function initSupabase(){try{if(typeof window!=='undefined'&&window.supabase){sbClient=window.supabase;console.log('✅ Supabase 初始化成功（使用全域變量）');return true;}if(typeof createClient!=='undefined'){sbClient=createClient(SUPABASE_URL,SUPABASE_KEY);console.log('✅ Supabase 初始化成功（動態引入）');return true;}return false;}catch(err){console.error('❌ Supabase 初始化失敗:',err);sbClient=null;return false;}}
-        const state={currentUser:null,currentProfile:null,selectedPartner:null,matchedPartner:null,likedProfiles:new Set(),pendingLikes:new Set(),isGuestMode:false,currentTab:'profiles',circleSubscription:null};
-        document.addEventListener('DOMContentLoaded',async()=>{try{await initSupabase();setupEventListeners();showGuestView();await loadCircles();await loadRoleData();if(state.currentUser){await refreshApp();}console.log('✅ MVP 初始化完成');}catch(err){console.error('❌ MVP 初始化失敗:',err);alert('系統初始化失敗，請重新整理頁面');}});
-        function setupEventListeners(){document.querySelectorAll('.modal-overlay').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m)m.classList.add('hidden')})});document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('.modal-overlay:not(#postsModal)').forEach(m=>m.classList.add('hidden'))}});document.getElementById('guestBtn')?.addEventListener('click',()=>{state.isGuestMode=true;showGuestView()});document.getElementById('loginBtn')?.addEventListener('click',()=>{showAuth('login')});document.getElementById('signupBtn')?.addEventListener('click',()=>{showAuth('signup')});document.getElementById('logoutBtn')?.addEventListener('click',async()=>{await doLogout()});document.getElementById('startExploring')?.addEventListener('click',()=>{showGuestView();loadRoleData()});document.getElementById('editProfileBtn')?.addEventListener('click',()=>{showEditProfile()});document.getElementById('chatBtn')?.addEventListener('click',()=>{showChat()});document.getElementById('postsBtn')?.addEventListener('click',()=>{showPosts()});document.getElementById('toggleAuthMode')?.addEventListener('click',toggleAuthMode);document.getElementById('closeAuth')?.addEventListener('click',()=>document.getElementById('authModal').classList.add('hidden'));document.getElementById('authForm')?.addEventListener('submit',onAuthSubmit);document.getElementById('closeChat')?.addEventListener('click',()=>{document.getElementById('chatModal').classList.add('hidden')});document.getElementById('sendMessage')?.addEventListener('click',sendMessage);document.getElementById('chatInput')?.addEventListener('keypress',e=>{if(e.key==='Enter')sendMessage()});document.getElementById('closePosts')?.addEventListener('click',()=>document.getElementById('postsModal').classList.add('hidden'));document.getElementById('inviteBtn')?.addEventListener('click',()=>{document.getElementById('matchModal').classList.add('hidden');showMatchInvite()});document.getElementById('closeMatch')?.addEventListener('click',()=>document.getElementById('matchModal').classList.add('hidden'));document.getElementById('circleSelect')?.addEventListener('change',loadCircles);document.getElementById('roleGrid')?.addEventListener('click',e=>{const card=e.target.closest('.role-card');if(card){const id=card.dataset.profileId;if(state.currentUser){handleLikeFromCard(id)}else{alert('請先登入以互動！')}}});}
-        function showAuth(mode){state.isGuestMode=false;document.getElementById('authTitle').textContent=mode==='login'?'登入帳號':'立即註冊';document.getElementById('authMode').value=mode;document.getElementById('submitBtnText').textContent=mode==='login'?'登入':'註冊';document.getElementById('authModal').classList.remove('hidden');}
-        function toggleAuthMode(){const mode=document.getElementById('authMode').value;document.getElementById('authMode').value=mode==='login'?'signup':'login';document.getElementById('submitBtnText').textContent=document.getElementById('authMode').value==='login'?'登入':'註冊';document.getElementById('authTitle').textContent=document.getElementById('authMode').value==='login'?'登入帳號':'立即註冊';}
-        function showGuestView(){document.getElementById('guestView').classList.remove('hidden');document.getElementById('appView').classList.add('hidden');document.getElementById('chatModal').classList.add('hidden');document.getElementById('matchModal').classList.add('hidden');document.getElementById('postsModal').classList.add('hidden');state.currentTab='profiles';}
-        async function showAppView(){document.getElementById('guestView').classList.add('hidden');document.getElementById('appView').classList.remove('hidden');await refreshApp();}
-        async function refreshApp(){if(!state.currentUser)return;await loadProfileData();await loadProfileCards();}
-        async function doLogout(){if(!sbClient)return;try{await sbClient.auth.signOut();}catch(e){}state.currentUser=null;state.currentProfile=null;state.matchedPartner=null;showGuestView();}
-        async function loadCircles(){const select=document.getElementById('circleSelect');if(!sbClient)return;try{const{result:data,error}=await sbClient.from('circles_master').select('circle_code,display_name');if(error){console.warn('載入圈層失敗:',error.message);return;}select.innerHTML='<option value="">—— 選擇生活圈層 ——</option>';(data||[]).forEach(c=>{const display=c.display_name?.zh_TW||c.display_name?.zh||c.circle_code||'未命名';const opt=document.createElement('option');opt.value=c.circle_code||'';opt.textContent=display||c.circle_code;select.appendChild(opt));}catch(err){console.warn('圈層載入錯誤:',err.message);}}
-        async function loadRoleData(){if(sbClient){try{const{data,error}=await sbClient.from('users_profile').select('*').limit(4);if(!error&&data&&data.length>0){console.log('✅ 從 Supabase users_profile 載入角色:',data.length);renderRoleCards(data);return;}catch(e){console.warn('users_profile 載入錯誤，將使用內建資料:',e.message);}}const demo=[{id:'demo_1',nickname:'大雄',age:26,district:'北屯區',circle_code:'TECH_DEV',bio:'每週至少爬一座山！對於任何登山路線充滿熱情。也喜歡拍攝風景，期待和你一起發現台中美麗的角落。',tags:['登山','風景攝影','徒步旅行','徒步','爬山'],avatar_url:'https://api.dicebear.com/7.x/notionists/svg?seed=大雄',isDemo:true},{id:'demo_2',nickname:'美玉',age:24,district:'西屯區',circle_code:'MED_SHIFT',bio:'熱愛生活，喜歡在周末一起爬山、拍照、吃美食。有一個好的伴侶能讓每一天都更精彩！',tags:['攀登','運動','美食','攝影','旅行'],avatar_url:'https://api.dicebear.com/7.x/notionists/svg?seed=美玉',isDemo:true},{id:'demo_3',nickname:'志堅',age:28,district:'南屯區',circle_code:'ACG_CORE',bio:'痴迷大自然，周末總是找地方跑。希望找到一個能一起放空、聊天、探索的小夥伴。',tags:['自然','徒步','星空愛好者','喝咖啡','散步'],avatar_url:'https://api.dicebear.com/7.x/notionists/svg?seed=志堅',isDemo:true},{id:'demo_4',nickname:'念媛',age:25,district:'北區',circle_code:'UNI_ROOKIE',bio:'喜歡用相機記錄每一個細微之處，重視生活的品質。期待遇到有趣的人一起慢跑、拍照、探險。',tags:['攝影','慢跑','藝術','咖啡店','攝影'],avatar_url:'https://api.dicebear.com/7.x/notionists/svg?seed=念媛',isDemo:true}];renderRoleCards(demo);}
-        function renderRoleCards(profiles){const grid=document.getElementById('roleGrid');if(!grid)return;grid.innerHTML=profiles.map(p=>{const circle=p.circle_code||'未指定';const quota=p.free_meet_quota??3;return `<div class="role-card flex flex-col items-center text-center cursor-pointer" data-profile-id="${p.id||p.nickname}"><div class="avatar"><img src="${p.avatar_url||'https://api.dicebear.com/7.x/notionists/svg?seed=預設'}" alt="${p.nickname}" onerror="this.src='https://api.dicebear.com/7.x/notionists/svg?seed=預設'"></div><h3>${p.nickname}</h3><p>${p.district||'未指定行政區'}</p><p class="text-xs text-gray-500 mt-1">${circle}</p><div class="mt-2 badge-quota">🛂 免費見面護照剩餘：${quota}</div></div>`;}).join('');}
-        async function handleLikeFromCard(profileId){if(!state.currentUser){alert('請先登入！');return;}if(!sbClient){alert('系統錯誤：Supabase 連線失敗');return;}if(state.isGuestMode){alert('訪客模式：自動為您送出喜歡，系統將在後台處理。')}state.pendingLikes.add(profileId);try{await sbClient.from('matches_and_meets').insert({user_a:state.currentUser.id,to_user_id:profileId,relationship_stage:'SPARK',hidden_affinity_score:50,meet_status:'NONE'});const{existing}=await sbClient.from('likes').select('*').eq('from_user_id',state.currentUser.id).eq('to_user_id',profileId).single();if(existing&&existing.liked_by){state.matchedPartner=profileId;showMatchModal(profileId);}else{alert('已送出喜歡訊號，對方收到後會通知您！');}}catch(e){console.error('推送喜歡失敗:',e);alert('已送出喜歡訊號，對方收到後會通知您！');}finally{state.pendingLikes.delete(profileId);}}
-        function showMatchModal(profileId){if(state.matchedPartner){document.getElementById('matchedNickname').textContent=state.matchedPartner.nickname||'未知夥伴';}else{document.getElementById('matchedNickname').textContent='未知';}document.getElementById('matchModal').classList.remove('hidden');}
-        function showMatchInvite(){document.getElementById('matchModal').classList.add('hidden');const html=`<div class="bg-white rounded-2xl p-8 text-center shadow-2xl max-w-md mx-4 slide-in"><h2 class="text-2xl font-bold text-gray-800 mb-4">📅 發起 60 分鐘見面邀請</h2><p class="text-gray-600 mb-6">選擇一天與對側面對面走走，雙方到達後 GPS 雙人打卡驗證成功。</p><div class="flex flex-col gap-3"><input id="meetDate" type="date" class="border border-gray-300 rounded-lg px-4 py-3 text-center"><input id="meetTime" type="time" step="1800" class="border border-gray-300 rounded-lg px-4 py-3 text-center"><p class="text-xs text-gray-400">時間：60 分鐘視窗</p><div class="flex gap-3 justify-center"><button id="confirmInvite" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-8 rounded-xl">確認邀請</button><button id="cancelInvite" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 px-8 rounded-xl">取消</button></div></div></div>`;document.getElementById('matchModal').innerHTML=html;document.getElementById('matchModal').classList.remove('hidden');document.getElementById('confirmInvite')?.addEventListener('click',confirmMeetInvite);}
-        async function confirmMeetInvite(){const date=document.getElementById('meetDate').value;const time=document.getElementById('meetTime').value;if(!date||!time){alert('請選擇日期與時間');return;}try{await sbClient.from('matches_and_meets').update({meet_status:'INVITED',meet_invited_by:state.currentUser.id}).eq('user_a',state.currentUser.id).eq('user_b',state.matchedPartner?.id);alert('見面邀請已發送，請等待對方確認！');}catch(e){alert('發送見面邀請失敗：'+e.message);}}
-        function showChat(){if(!state.currentUser){alert('請先登入！');return;}document.getElementById('chatModal').classList.remove('hidden');document.getElementById('chatMessages').innerHTML='<p class="text-gray-500 text-center py-8">正在載入聊天內容…</p>';loadChatMessages();connectRealtime();}
-        function connectRealtime(){if(!sbClient||!state.selectedPartner)return;try{sbClient.channel('private_messages').on('postgres_changes',{Event:'INSERT',schema:'public',table:'private_messages'},payload=>{if(payload.new&&(payload.new.sender_id===state.currentUser.id||payload.new.receiver_id===state.currentUser.id)){loadChatMessages();}}).subscribe();console.log('✅ Realtime 連線已啟用：private_messages');}catch(err){console.warn('Realtime 連線錯誤:',err.message);}}
-        async function loadChatMessages(){if(!state.currentUser||!state.selectedPartner)return;const container=document.getElementById('chatMessages');if(!container)return;try{const{data,error}=await sbClient.from('private_messages').select('*').or(`sender_id.eq.${state.currentUser.id},receiver_id.eq.${state.currentUser.id}`).order('created_at',{ascending:false}).limit(50);if(error){container.innerHTML='<p class="text-red-500 text-center py-8">載入訊息失敗</p>';return;}if(!data||data.length===0){container.innerHTML='<p class="text-gray-400 text-center py-8">尚無任何私訊，開始對話吧！</p>';return;}const messages=data.sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));container.innerHTML=messages.map(msg=>{const isMe=msg.sender_id===state.currentUser.id;return `<div class="flex ${isMe?'justify-end':'justify-start'} mb-3"><div class="max-w-xs rounded-2xl px-4 py-3 shadow-sm ${isMe?'bg-green-500 text-white':"bg-white border border-gray-200"}"><div class="flex justify-between items-baseline gap-2"><span class="text-[10px] ${isMe?'text-green-100':'text-gray-500'} font-medium">${isMe?'你':(state.selectedPartner?.nickname||'對方')} ${new Date(msg.created_at).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'})}</span></div><p class="text-sm leading-relaxed">${msg.content}</p></div></div>`;}).join('');}catch(e){container.innerHTML='<p class="text-red-500 text-center py-8">載入訊息失敗</p>';}}
-        async function sendMessage(){const content=document.getElementById('chatInput').value.trim();if(!content)return;if(!state.currentUser){alert('請先登入');return;}if(!state.selectedPartner){alert('請先在配對頁選擇一位夥伴');return;}if(!sbClient){alert('系統錯誤：Supabase 連線失敗');return;}try{await sbClient.from('private_messages').insert({sender_id:state.currentUser.id,receiver_id:state.selectedPartner.id,content:content,created_at:new Date().toISOString()});document.getElementById('chatInput').value='';loadChatMessages();}catch(e){alert('發送失敗：'+e.message);}}
-        function showPosts(){state.currentTab='posts';document.getElementById('postsModal').classList.remove('hidden');loadPosts();}
-        async function loadPosts(){const container=document.getElementById('postsList');if(!sbClient){container.innerHTML='<p class="text-red-500 text-center py-8">Supabase 連線失敗</p>';return;}try{const posts=[];if(state.currentUser){const{userRes}=await sbClient.from('users_profile').select('*').eq('id',state.currentUser.id).single();if(userRes&&userRes.circle_code){const{postsRes}=await sbClient.from('moments_posts').select('*').eq('circle_code',userRes.circle_code).order('created_at',{ascending:false}).limit(30);posts.push(...(postsRes||[]));}}posts.push({post_id:'demo_1',author_id:state.currentUser?.id||'demo_user',circle_code:'TECH_DEV',content_text:'✨ 大雄的一天：清晨山間霧氣，爬上山頂，風吹面頰，真好。',image_url:'https://api.dicebear.com/7.x/notionists/svg?seed=大雄',visibility:'CIRCLE_ONLY',created_at:new Date().toISOString()});posts.push({post_id:'demo_2',author_id:state.currentUser?.id||'demo_user',circle_code:'MED_SHIFT',content_text:'🌅 美玉在醫院輪班後，來到台中公園散步，天光很美。',image_url:'https://api.dicebear.com/7.x/notionists/svg?seed=美玉',visibility:'CIRCLE_ONLY',created_at:new Date().toISOString()});container.innerHTML=posts.map(p=>`<div class="bg-white rounded-xl shadow-md p-5 card-hover"><div class="flex gap-4"><div class="avatar w-14 h-14 rounded-full overflow-hidden flex-shrink-0"><img src="${p.author_id===state.currentUser?.id?'https://api.dicebear.com/7.x/notionists/svg?seed=預設':(p.avatar_url||'https://api.dicebear.com/7.x/notionists/svg?seed=預設')}" alt="頭像" onerror="this.src='https://api.dicebear.com/7.x/notionists/svg?seed=預設'"></div><div class="flex-1 min-w-0"><div class="flex justify-between items-center mb-2"><span class="font-bold text-gray-800 truncate">${state.currentUser?.id===p.author_id?'你':(p.author_id||'未知')}</span><span class="text-xs text-gray-400">${new Date(p.created_at||'').toLocaleString('zh-TW')}</span></div><p class="text-gray-700 whitespace-pre-wrap">${p.content_text}</p>${p.image_url?`<img src="${p.image_url}" alt="動態圖片" class="mt-3 rounded-lg w-full max-h-64 object-cover" onerror="this.src='https://api.dicebear.com/7.x/notionists/svg?seed=預設'">`:''}</div></div><div class="mt-4 pt-3 border-t border-gray-100"><div class="flex gap-2"><input id="commentInput_${p.post_id}" class="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm" placeholder="寫下你的留言…" maxlength="200"><button class="btn-primary text-sm px-4 py-2 rounded-lg comment-submit" data-post-id="${p.post_id}">送出</button></div><div class="mt-3 space-y-2" id="comments_${p.post_id}"></div></div></div>`).join('');document.querySelectorAll('.comment-submit').forEach(btn=>{btn.addEventListener('click',async()=>{const postId=btn.dataset.postId;const input=document.getElementById(`commentInput_${postId}`);const content=input.value.trim();if(!content)return;try{await sbClient.from('moments_comments').insert({post_id:postId,user_id:state.currentUser.id,comment_text:content});input.value='';loadPosts();}catch(e){alert('發布留言失敗：'+e.message);});});}catch(e){container.innerHTML='<p class="text-red-500 text-center py-8">載入動態失敗</p>';}}
-        async function postUpdate(){const content=document.getElementById('postInput').value.trim();if(!content){alert('請輸入動態內容');return;}if(!state.currentUser){alert('請先登入');return;}if(!sbClient){alert('系統錯誤：Supabase 連線失敗');return;}try{const circleRes=await sbClient.from('circles_master').select('circle_code').limit(1).single();await sbClient.from('moments_posts').insert({author_id:state.currentUser.id,circle_code:circleRes?.circle_code||'UNI_ROOKIE',content_text:content,visibility:'CIRCLE_ONLY',created_at:new Date().toISOString()});document.getElementById('postInput').value='';loadPosts();}catch(e){alert('發布動態失敗：'+e.message);}}
-        async function loadProfileData(){if(sbClient&&state.currentUser){try{const{data,error}=await sbClient.from('users_profile').select('*').eq('id',state.currentUser.id).single();if(!error&&data){state.currentProfile=data;renderProfileInfo(data);return;}}catch(e){}if(!state.currentProfile){state.currentProfile=demoProfiles[0];renderProfileInfo(state.currentProfile);}}
-        function renderProfileInfo(profile){const safe=v=>v||'未設定';document.getElementById('memberNickname').textContent=safe(profile.nickname);document.getElementById('memberDistrict').textContent='行政區：'+safe(profile.district);document.getElementById('memberAge').textContent='年齡：'+safe(profile.age);document.getElementById('memberCircle').textContent='生活圈層：'+safe(profile.circle_code||'未指定');document.getElementById('memberTags').innerHTML=(profile.tags||[]).map(t=>`<span class="badge-quota">#${t}</span>`).join('');document.getElementById('memberBio').textContent=safe(profile.bio);document.getElementById('avatarPreview').src=profile.avatar_url||'https://api.dicebear.com/7.x/notionists/svg?seed=預設';}
-        async function loadProfileCards(){const grid=document.getElementById('profileGrid');if(!grid)return;const all=[];if(sbClient){try{const{data}=await sbClient.from('users_profile').select('*').limit(12);if(data)all.push(...data);}catch(e){}}if(all.length===0){all.push(...demoProfiles);}grid.innerHTML=all.map(p=>{const circle=p.circle_code||'未指定';const quota=p.free_meet_quota??3;const isMe=p.id===state.currentUser?.id;return `<div class="bg-white rounded-xl shadow-md overflow-hidden card-hover"><div class="relative"><img src="${p.avatar_url||'https://api.dicebear.com/7.x/notionists/svg?seed=預設'}" alt="${p.nickname}" class="w-full h-40 object-cover" onerror="this.src='https://api.dicebear.com/7.x/notionists/svg?seed=預設'"><div class="absolute bottom-2 right-2 bg-white/90 rounded-full px-3 py-1 shadow"><span class="text-sm font-bold text-green-700">${p.age}歲</span></div>${isMe?'<div class="absolute top-2 left-2 bg-green-500 text-white rounded-full px-3 py-1 text-xs font-bold">我</div>':''}</div><div class="p-4"><div class="flex justify-between items-center mb-2"><h3 class="text-lg font-bold text-gray-800">${p.nickname}</h3><span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">${p.district||'未指定行政區'}</span></div><p class="text-sm text-gray-600 mb-2">${p.bio}</p><div class="flex flex-wrap gap-1 mb-3">${(p.tags||[]).map(t=>`<span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">#${t}</span>`).join('')}</div><div class="flex justify-between items-center"><span class="text-xs text-gray-400">${circle}</span><div class="flex gap-2"><button class="btn-primary flex-1 text-sm font-bold py-2 px-3 rounded-lg" data-uid="${p.id}">💬 私訊</button><button class="bg-amber-100 hover:bg-amber-200 text-amber-800 font-bold py-2 px-3 rounded-lg text-sm flex-shrink-0" data-uid="${p.id}">📅 60分見面</button></div></div></div></div>`;}).join('');grid.querySelectorAll('[data-uid]').forEach(btn=>{btn.addEventListener('click',()=>{const uid=btn.dataset.uid;if(uid===state.currentUser?.id)return;state.selectedPartner={id:uid,nickname:btn.textContent.trim()};if(state.currentUser){showChat();}else{alert('請先登入以使用私訊功能！');});});}
-        function showEditProfile(){if(!state.currentUser)return;const nickname=prompt('暱稱:',state.currentProfile?.nickname||'');if(!nickname)return;const age=prompt('年齡:',state.currentProfile?.age||25);if(!age||isNaN(age))return;const district=prompt('行政區:',state.currentProfile?.district||'北區');const bio=prompt('自我介紹:',state.currentProfile?.bio||'');const tags=prompt('興趣標籤（逗號分隔）:',(state.currentProfile?.tags||[]).join(','));const tagArray=tags?tags.split(',').map(t=>t.trim()).filter(Boolean):[];const target=sbClient?.from('users_profile');if(!target){alert('系統錯誤');return;}target.update({nickname,age:parseInt(age),district,bio,tags:tagArray}).eq('id',state.currentUser.id).then(()=>{state.currentProfile={...state.currentProfile,nickname,age:parseInt(age),district,bio,tags:tagArray};renderProfileInfo(state.currentProfile);alert('個人資料已更新！');}).catch(err=>alert('更新錯誤：'+err.message));}
-        async function onAuthSubmit(e){e.preventDefault();const mode=document.getElementById('authMode').value;const email=document.getElementById('email').value.trim();const password=document.getElementById('password').value;const circle=document.getElementById('circleSelect').value;if(!email||!password){alert('請填寫完整資料');return;}if(!sbClient){alert('系統錯誤：Supabase 連線失敗');return;}try{if(mode==='signup'){const{data,error}=await sbClient.auth.signUp({email,password});if(error)throw error;await sbClient.from('users_profile').insert({id:data.user.id,nickname:email.split('@')[0]||'新會員',age:25,district:'北區',bio:'加入台中跑咖，期待與您相遇！',tags:['跑步','登山'],avatar_url:`https://api.dicebear.com/7.x/notionists/svg?seed=${data.user.id}`,circle_code:circle||'UNI_ROOKIE',created_at:new Date().toISOString()}).catch(()=>{});alert('註冊成功！請檢查您的電子郵件並點擊驗證連結。驗證後即可使用完整功能。');document.getElementById('authModal').classList.add('hidden');}else{const{data,error}=await sbClient.auth.signInWithPassword({email,password});if(error)throw error;state.currentUser=data.user;showAppView();await loadProfileData();await loadProfileCards();}}catch(err){alert('發生錯誤：'+err.message);}}
+        // ─── 初始化 ─────────────────────────────────────────────
+        function loadSupabase(){
+            return new Promise((resolve, reject)=>{
+                if(typeof SupabaseClient!=='undefined'){ resolve(SupabaseClient); }
+                else if(typeof createClient!=='undefined'){ resolve(createClient); }
+                else {
+                    const interval = setInterval(()=>{
+                        if(typeof SupabaseClient!=='undefined'){ clearInterval(interval); resolve(SupabaseClient); }
+                        else if(typeof createClient!=='undefined'){ clearInterval(interval); resolve(createClient); }
+                        else if(document.readyState==='complete'){ clearInterval(interval); reject(new Error('Supabase SDK 載入失敗')); }
+                    }, 100);
+                }
+            });
+        }
+        let sbClient = null;
+        const SUPABASE_URL = 'https://kvicwvqirfygnvqrzhah.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_f0zl8u-g5aUnvODo_UoQlg_Io7dRsA3';
+
+        async function initSupabase(){
+            try{
+                if(typeof window!=='undefined' && window.supabase){ sbClient = window.supabase; console.log('✅ Supabase 初始化成功（使用全域變量）'); return true; }
+                if(typeof createClient!=='undefined'){ sbClient = createClient(SUPABASE_URL, SUPABASE_KEY); console.log('✅ Supabase 初始化成功（動態引入）'); return true; }
+                return false;
+            }catch(err){
+                console.error('❌ Supabase 初始化失敗:', err);
+                sbClient = null;
+                return false;
+            }
+        }
+
+        // ─── 狀態管理 ───────────────────────────────────────────
+        const state = {
+            currentUser: null,
+            currentProfile: null,
+            selectedPartner: null,
+            matchedPartner: null,
+            likedProfiles: new Set(),
+            pendingLikes: new Set(),
+            isGuestMode: false,
+            currentTab: 'profiles',
+            circleSubscription: null
+        };
+
+        // ─── 4 位示範角色（內建備援）───
+        const demoProfiles = [
+            { id:'demo_1', nickname:'大雄', age:26, district:'北屯區', circle_code:'TECH_DEV',
+              bio:'每週至少爬一座山！對於任何登山路線充滿熱情。也喜歡拍攝風景，期待和你一起發現台中美麗的角落。',
+              tags:['登山','風景攝影','徒步旅行','徒步','爬山'],
+              avatar_url:'https://api.dicebear.com/7.x/notionists/svg?seed=大雄' },
+            { id:'demo_2', nickname:'美玉', age:24, district:'西屯區', circle_code:'MED_SHIFT',
+              bio:'熱愛生活，喜歡在周末一起爬山、拍照、吃美食。有一個好的伴侶能讓每一天都更精彩！',
+              tags:['攀登','運動','美食','攝影','旅行'],
+              avatar_url:'https://api.dicebear.com/7.x/notionists/svg?seed=美玉' },
+            { id:'demo_3', nickname:'志堅', age:28, district:'南屯區', circle_code:'ACG_CORE',
+              bio:'痴迷大自然，周末總是找地方跑。希望找到一個能一起放空、聊天、探索的小夥伴。',
+              tags:['自然','徒步','星空愛好者','喝咖啡','散步'],
+              avatar_url:'https://api.dicebear.com/7.x/notionists/svg?seed=志堅' },
+            { id:'demo_4', nickname:'念媛', age:25, district:'北區', circle_code:'UNI_ROOKIE',
+              bio:'喜歡用相機記錄每一個細微之處，重視生活的品質。期待遇到有趣的人一起慢跑、拍照、探險。',
+              tags:['攝影','慢跑','藝術','咖啡店','攝影'],
+              avatar_url:'https://api.dicebear.com/7.x/notionists/svg?seed=念媛' }
+        ];
+
+        // ──────────────────────────────────────────────────────────
+        // 初始化 (修正: 訪客模式不讀 users_profile)
+        // ──────────────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded',async()=>{
+            try{
+                await initSupabase();
+                setupEventListeners();
+                showGuestView();
+                await loadCircles();
+                // 訪客模式：不讀取 users_profile（RLS 保護），直接使用內建 demo 資料
+                if(state.currentUser){
+                    await loadRoleData();
+                } else {
+                    renderRoleCards(demoProfiles);
+                }
+                if(state.currentUser){ await refreshApp(); }
+                console.log('✅ MVP 初始化完成');
+            }catch(err){
+                // 訪客模式下，僅讀取受保護資料表失敗屬正常現象，僅記錄
+                if(err && err.message && err.message.includes('users_profile')){
+                    console.warn('（訪客模式）忽略 users_profile 讀取錯誤:', err.message);
+                } else {
+                    console.error('❌ MVP 初始化失敗:', err);
+                    alert('系統初始化失敗，請重新整理頁面');
+                }
+            }
+        });
+
+        // ─── 事件綁定 ───────────────────────────────────────────
+        function setupEventListeners(){
+            document.querySelectorAll('.modal-overlay').forEach(m=>{
+                m.addEventListener('click',e=>{ if(e.target===m) m.classList.add('hidden'); });
+            });
+            document.addEventListener('keydown',e=>{
+                if(e.key==='Escape'){
+                    document.querySelectorAll('.modal-overlay:not(#postsModal)').forEach(m=>m.classList.add('hidden'));
+                }
+            });
+            document.getElementById('guestBtn')?.addEventListener('click',()=>{ state.isGuestMode=true; showGuestView(); });
+            document.getElementById('loginBtn')?.addEventListener('click',()=>{ showAuth('login'); });
+            document.getElementById('signupBtn')?.addEventListener('click',()=>{ showAuth('signup'); });
+            document.getElementById('logoutBtn')?.addEventListener('click',async()=>{ await doLogout(); });
+            document.getElementById('startExploring')?.addEventListener('click',()=>{ showGuestView(); loadRoleData(); });
+            document.getElementById('editProfileBtn')?.addEventListener('click',()=>{ showEditProfile(); });
+            document.getElementById('chatBtn')?.addEventListener('click',()=>{ showChat(); });
+            document.getElementById('postsBtn')?.addEventListener('click',()=>{ showPosts(); });
+            document.getElementById('toggleAuthMode')?.addEventListener('click',toggleAuthMode);
+            document.getElementById('closeAuth')?.addEventListener('click',()=>document.getElementById('authModal').classList.add('hidden'));
+            document.getElementById('authForm')?.addEventListener('submit',onAuthSubmit);
+            document.getElementById('closeChat')?.addEventListener('click',()=>{ document.getElementById('chatModal').classList.add('hidden'); });
+            document.getElementById('sendMessage')?.addEventListener('click',sendMessage);
+            document.getElementById('chatInput')?.addEventListener('keypress',e=>{ if(e.key==='Enter') sendMessage(); });
+            document.getElementById('closePosts')?.addEventListener('click',()=>document.getElementById('postsModal').classList.add('hidden'));
+            document.getElementById('inviteBtn')?.addEventListener('click',()=>{
+                document.getElementById('matchModal').classList.add('hidden');
+                showMatchInvite();
+            });
+            document.getElementById('closeMatch')?.addEventListener('click',()=>document.getElementById('matchModal').classList.add('hidden'));
+            document.getElementById('circleSelect')?.addEventListener('change',loadCircles);
+            document.getElementById('roleGrid')?.addEventListener('click',e=>{
+                const card = e.target.closest('.role-card');
+                if(card){ const id = card.dataset.profileId; if(state.currentUser){ handleLikeFromCard(id); } else { alert('請先登入以互動！'); } }
+            });
+        }
+
+        // ─── 顯示邏輯 ───────────────────────────────────────────
+        function showAuth(mode){
+            state.isGuestMode = false;
+            document.getElementById('authTitle').textContent = mode==='login'?'登入帳號':'立即註冊';
+            document.getElementById('authMode').value = mode;
+            document.getElementById('submitBtnText').textContent = mode==='login'?'登入':'註冊';
+            document.getElementById('authModal').classList.remove('hidden');
+        }
+        function toggleAuthMode(){
+            const mode = document.getElementById('authMode').value;
+            document.getElementById('authMode').value = mode==='login'?'signup':'login';
+            document.getElementById('submitBtnText').textContent = document.getElementById('authMode').value==='login'?'登入':'註冊';
+            document.getElementById('authTitle').textContent = document.getElementById('authMode').value==='login'?'登入帳號':'立即註冊';
+        }
+        function showGuestView(){
+            document.getElementById('guestView').classList.remove('hidden');
+            document.getElementById('appView').classList.add('hidden');
+            document.getElementById('chatModal').classList.add('hidden');
+            document.getElementById('matchModal').classList.add('hidden');
+            document.getElementById('postsModal').classList.add('hidden');
+            state.currentTab = 'profiles';
+        }
+        async function showAppView(){
+            document.getElementById('guestView').classList.add('hidden');
+            document.getElementById('appView').classList.remove('hidden');
+            await refreshApp();
+        }
+        async function refreshApp(){
+            if(!state.currentUser) return;
+            await loadProfileData();
+            await loadProfileCards();
+        }
+        async function doLogout(){
+            if(!sbClient) return;
+            try{ await sbClient.auth.signOut(); }catch(e){}
+            state.currentUser = null;
+            state.currentProfile = null;
+            state.matchedPartner = null;
+            showGuestView();
+        }
+
+        // ─── 圈層列表 ───────────────────────────────────────────
+        async function loadCircles(){
+            const select = document.getElementById('circleSelect');
+            if(!sbClient) return;
+            try{
+                const {data,error} = await sbClient.from('circles_master').select('circle_code,display_name');
+                if(error){ console.warn('載入圈層失敗:', error.message); return; }
+                select.innerHTML = '<option value="">—— 選擇生活圈層 ——</option>';
+                (data||[]).forEach(c=>{
+                    const display = c.display_name?.zh_TW || c.display_name?.zh || c.circle_code || '未命名';
+                    const opt = document.createElement('option');
+                    opt.value = c.circle_code || '';
+                    opt.textContent = display || c.circle_code;
+                    select.appendChild(opt);
+                });
+            }catch(err){ console.warn('圈層載入錯誤:', err.message); }
+        }
+
+        // ─── 角色數據 ───────────────────────────────────────────
+        async function loadRoleData(){
+            // 訪客模式：不讀取 users_profile（RLS 保護），直接使用內建 demo 資料
+            if(!state.currentUser){
+                renderRoleCards(demoProfiles);
+                return;
+            }
+            if(!sbClient) { renderRoleCards(demoProfiles); return; }
+            try{
+                const {data,error} = await sbClient
+                    .from('users_profile')
+                    .select('*')
+                    .limit(4);
+                if(!error && data && data.length > 0){
+                    console.log('✅ 從 Supabase users_profile 載入角色:', data.length);
+                    renderRoleCards(data);
+                    return;
+                }
+            }catch(e){
+                console.warn('users_profile 載入錯誤（降級為內建資料）:', e.message);
+            }
+            // 降級：使用內建 demo 資料
+            renderRoleCards(demoProfiles);
+        }
+
+        function renderRoleCards(profiles){
+            const grid = document.getElementById('roleGrid');
+            if(!grid) return;
+            grid.innerHTML = profiles.map(p=>{
+                const circle = p.circle_code || '未指定';
+                const quota = p.free_meet_quota ?? 3;
+                return `
+                    <div class="role-card flex flex-col items-center text-center cursor-pointer"
+                         data-profile-id="${p.id || p.nickname}">
+                        <div class="avatar">
+                            <img src="${p.avatar_url || 'https://api.dicebear.com/7.x/notionists/svg?seed=預設'}"
+                                 alt="${p.nickname}"
+                                 onerror="this.src='https://api.dicebear.com/7.x/notionists/svg?seed=預設'">
+                        </div>
+                        <h3>${p.nickname}</h3>
+                        <p>${p.district || '未指定行政區'}</p>
+                        <p class="text-xs text-gray-500 mt-1">${circle}</p>
+                        <div class="mt-2 badge-quota">🛂 免費見面護照剩餘：${quota}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ─── 配對邏輯 ───────────────────────────────────────────
+        async function handleLikeFromCard(profileId){
+            if(!state.currentUser){ alert('請先登入！'); return; }
+            if(!sbClient){ alert('系統錯誤：Supabase 連線失敗'); return; }
+            if(state.isGuestMode){ alert('訪客模式：自動為您送出喜歡，系統將在後台處理。'); }
+            state.pendingLikes.add(profileId);
+            try{
+                await sbClient.from('matches_and_meets').insert({
+                    user_a: state.currentUser.id,
+                    to_user_id: profileId,
+                    relationship_stage: 'SPARK',
+                    hidden_affinity_score: 50,
+                    meet_status: 'NONE'
+                });
+                const {data: existing} = await sbClient
+                    .from('likes')
+                    .select('*')
+                    .eq('from_user_id', state.currentUser.id)
+                    .eq('to_user_id', profileId)
+                    .single();
+                if(existing && existing.liked_by){
+                    state.matchedPartner = profileId;
+                    showMatchModal(profileId);
+                } else {
+                    alert('已送出喜歡訊號，對方收到後會通知您！');
+                }
+            }catch(e){
+                console.error('推送喜歡失敗:', e);
+                alert('已送出喜歡訊號，對方收到後會通知您！');
+            }finally{
+                state.pendingLikes.delete(profileId);
+            }
+        }
+
+        function showMatchModal(profileId){
+            if(state.matchedPartner && state.matchedPartner.nickname){
+                document.getElementById('matchedNickname').textContent = state.matchedPartner.nickname;
+            } else {
+                document.getElementById('matchedNickname').textContent = '未知夥伴';
+            }
+            document.getElementById('matchModal').classList.remove('hidden');
+        }
+
+        function showMatchInvite(){
+            document.getElementById('matchModal').classList.add('hidden');
+            const html = `
+                <div class="bg-white rounded-2xl p-8 text-center shadow-2xl max-w-md mx-4 slide-in">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">📅 發起 60 分鐘見面邀請</h2>
+                    <p class="text-gray-600 mb-6">選擇一天與對側面對面走走，雙方到達後 GPS 雙人打卡驗證成功。</p>
+                    <div class="flex flex-col gap-3">
+                        <input id="meetDate" type="date" class="border border-gray-300 rounded-lg px-4 py-3 text-center">
+                        <input id="meetTime" type="time" step="1800" class="border border-gray-300 rounded-lg px-4 py-3 text-center">
+                        <p class="text-xs text-gray-400">時間：60 分鐘視窗</p>
+                        <div class="flex gap-3 justify-center">
+                            <button id="confirmInvite" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-8 rounded-xl">確認邀請</button>
+                            <button id="cancelInvite" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 px-8 rounded-xl">取消</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('matchModal').innerHTML = html;
+            document.getElementById('matchModal').classList.remove('hidden');
+            document.getElementById('confirmInvite')?.addEventListener('click',confirmMeetInvite);
+        }
+
+        async function confirmMeetInvite(){
+            const date = document.getElementById('meetDate').value;
+            const time = document.getElementById('meetTime').value;
+            if(!date || !time){ alert('請選擇日期與時間'); return; }
+            try{
+                await sbClient.from('matches_and_meets').update({
+                    meet_status: 'INVITED',
+                    meet_invited_by: state.currentUser.id
+                }).eq('user_a', state.currentUser.id).eq('user_b', state.matchedPartner?.id);
+                alert('見面邀請已發送，請等待對方確認！');
+            }catch(e){ alert('發送見面邀請失敗：' + e.message); }
+        }
+
+        // ─── 聊天室 ─────────────────────────────────────────────
+        function showChat(){
+            if(!state.currentUser){ alert('請先登入！'); return; }
+            document.getElementById('chatModal').classList.remove('hidden');
+            document.getElementById('chatMessages').innerHTML = '<p class="text-gray-500 text-center py-8">正在載入聊天內容…</p>';
+            loadChatMessages();
+            connectRealtime();
+        }
+
+        function connectRealtime(){
+            if(!sbClient || !state.selectedPartner) return;
+            try{
+                sbClient.channel('private_messages')
+                    .on('postgres_changes',{Event:'INSERT',schema:'public',table:'private_messages'},payload=>{
+                        if(payload.new && (payload.new.sender_id===state.currentUser.id || payload.new.receiver_id===state.currentUser.id)){
+                            loadChatMessages();
+                        }
+                    })
+                    .subscribe();
+                console.log('✅ Realtime 連線已啟用：private_messages');
+            }catch(err){
+                console.warn('Realtime 連線錯誤（非嚴重）:', err.message);
+            }
+        }
+
+        async function loadChatMessages(){
+            if(!state.currentUser || !state.selectedPartner) return;
+            const container = document.getElementById('chatMessages');
+            if(!container) return;
+            try{
+                const {data,error} = await sbClient
+                    .from('private_messages')
+                    .select('*')
+                    .or(`sender_id.eq.${state.currentUser.id},receiver_id.eq.${state.currentUser.id}`)
+                    .order('created_at',{ascending:false})
+                    .limit(50);
+                if(error){ container.innerHTML = '<p class="text-red-500 text-center py-8">載入訊息失敗</p>'; return; }
+                if(!data || data.length===0){ container.innerHTML = '<p class="text-gray-400 text-center py-8">尚無任何私訊，開始對話吧！</p>'; return; }
+                const messages = data.sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+                container.innerHTML = messages.map(msg=>{
+                    const isMe = msg.sender_id===state.currentUser.id;
+                    return `
+                        <div class="flex ${isMe?'justify-end':'justify-start'} mb-3">
+                            <div class="max-w-xs rounded-2xl px-4 py-3 shadow-sm ${isMe?'bg-green-500 text-white':"bg-white border border-gray-200"}">
+                                <div class="flex justify-between items-baseline gap-2">
+                                    <span class="text-[10px] ${isMe?'text-green-100':'text-gray-500'} font-medium">
+                                        ${isMe?'你':(state.selectedPartner?.nickname||'對方')} ${new Date(msg.created_at).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'})}
+                                    </span>
+                                </div>
+                                <p class="text-sm leading-relaxed">${msg.content}</p>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }catch(e){
+                container.innerHTML = '<p class="text-red-500 text-center py-8">載入訊息失敗</p>';
+            }
+        }
+
+        async function sendMessage(){
+            const content = document.getElementById('chatInput').value.trim();
+            if(!content) return;
+            if(!state.currentUser){ alert('請先登入'); return; }
+            if(!state.selectedPartner){ alert('請先在配對頁選擇一位夥伴'); return; }
+            if(!sbClient){ alert('系統錯誤：Supabase 連線失敗'); return; }
+            try{
+                await sbClient.from('private_messages').insert({
+                    sender_id: state.currentUser.id,
+                    receiver_id: state.selectedPartner.id,
+                    content: content,
+                    created_at: new Date().toISOString()
+                });
+                document.getElementById('chatInput').value='';
+                loadChatMessages();
+            }catch(e){ alert('發送失敗：' + e.message); }
+        }
+
+        // ─── 動態牆 ─────────────────────────────────────────────
+        function showPosts(){
+            state.currentTab = 'posts';
+            document.getElementById('postsModal').classList.remove('hidden');
+            loadPosts();
+        }
+
+        async function loadPosts(){
+            const container = document.getElementById('postsList');
+            if(!sbClient){ container.innerHTML = '<p class="text-red-500 text-center py-8">Supabase 連線失敗</p>'; return; }
+            try{
+                const posts = [];
+                if(state.currentUser){
+                    const{userRes} = await sbClient.from('users_profile').select('*').eq('id',state.currentUser.id).single();
+                    if(userRes && userRes.home_circle){
+                        const{postsRes} = await sbClient
+                            .from('moments_posts')
+                            .select('*')
+                            .eq('circle_code', userRes.home_circle)
+                            .order('created_at',{ascending:false})
+                            .limit(30);
+                        posts.push(...(postsRes||[]));
+                    }
+                }
+                // 示範資料
+                posts.push({
+                    post_id:'demo_1',
+                    author_id: state.currentUser?.id || 'demo_user',
+                    circle_code:'TECH_DEV',
+                    content_text:'✨ 大雄的一天：清晨山間霧氣，爬上山頂，風吹面頰，真好。',
+                    image_url:'https://api.dicebear.com/7.x/notionists/svg?seed=大雄',
+                    visibility:'CIRCLE_ONLY',
+                    created_at:new Date().toISOString()
+                });
+                posts.push({
+                    post_id:'demo_2',
+                    author_id: state.currentUser?.id || 'demo_user',
+                    circle_code:'MED_SHIFT',
+                    content_text:'🌅 美玉在醫院輪班後，來到台中公園散步，天光很美。',
+                    image_url:'https://api.dicebear.com/7.x/notionists/svg?seed=美玉',
+                    visibility:'CIRCLE_ONLY',
+                    created_at:new Date().toISOString()
+                });
+
+                container.innerHTML = posts.map(p=>`
+                    <div class="bg-white rounded-xl shadow-md p-5 card-hover">
+                        <div class="flex gap-4">
+                            <div class="avatar w-14 h-14 rounded-full overflow-hidden flex-shrink-0">
+                                <img src="${p.author_id===state.currentUser?.id?'https://api.dicebear.com/7.x/notionists/svg?seed=預設':(p.avatar_url||'https://api.dicebear.com/7.x/notionists/svg?seed=預設')}" alt="頭像" onerror="this.src='https://api.dicebear.com/7.x/notionists/svg?seed=預設'">
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="font-bold text-gray-800 truncate">${state.currentUser?.id===p.author_id?'你':(p.author_id||'未知')}</span>
+                                    <span class="text-xs text-gray-400">${new Date(p.created_at||'').toLocaleString('zh-TW')}</span>
+                                </div>
+                                <p class="text-gray-700 whitespace-pre-wrap">${p.content_text}</p>
+                                ${p.image_url?`<img src="${p.image_url}" alt="動態圖片" class="mt-3 rounded-lg w-full max-h-64 object-cover" onerror="this.src='https://api.dicebear.com/7.x/notionists/svg?seed=預設'">`:''}
+                            </div>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-gray-100">
+                            <div class="flex gap-2">
+                                <input id="commentInput_${p.post_id}" class="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm" placeholder="寫下你的留言…" maxlength="200">
+                                <button class="btn-primary text-sm px-4 py-2 rounded-lg comment-submit" data-post-id="${p.post_id}">送出</button>
+                            </div>
+                            <div class="mt-3 space-y-2" id="comments_${p.post_id}"></div>
+                        </div>
+                    </div>
+                `).join('');
+
+                document.querySelectorAll('.comment-submit').forEach(btn=>{
+                    btn.addEventListener('click',async()=>{
+                        const postId = btn.dataset.postId;
+                        const input = document.getElementById(`commentInput_${postId}`);
+                        const content = input.value.trim();
+                        if(!content) return;
+                        try{
+                            await sbClient.from('moments_comments').insert({
+                                post_id: postId,
+                                user_id: state.currentUser.id,
+                                comment_text: content
+                            });
+                            input.value='';
+                            loadPosts();
+                        }catch(e){ alert('發布留言失敗：' + e.message); }
+                    });
+                });
+            }catch(e){ container.innerHTML = '<p class="text-red-500 text-center py-8">載入動態失敗</p>'; }
+        }
+
+        async function postUpdate(){
+            const content = document.getElementById('postInput').value.trim();
+            if(!content){ alert('請輸入動態內容'); return; }
+            if(!state.currentUser){ alert('請先登入'); return; }
+            if(!sbClient){ alert('系統錯誤：Supabase 連線失敗'); return; }
+            try{
+                const circleRes = await sbClient.from('circles_master').select('circle_code').limit(1).single();
+                await sbClient.from('moments_posts').insert({
+                    author_id: state.currentUser.id,
+                    circle_code: circleRes?.circle_code || 'UNI_ROOKIE',
+                    content_text: content,
+                    visibility: 'CIRCLE_ONLY',
+                    created_at: new Date().toISOString()
+                });
+                document.getElementById('postInput').value='';
+                loadPosts();
+            }catch(e){ alert('發布動態失敗：' + e.message); }
+        }
+
+        // ─── 個人檔案 ───────────────────────────────────────────
+        async function loadProfileData(){
+            if(!state.currentUser) return;
+            if(!sbClient){ renderProfileInfo(demoProfiles[0]); return; }
+            try{
+                const {data,error} = await sbClient
+                    .from('users_profile')
+                    .select('*')
+                    .eq('id', state.currentUser.id)
+                    .single();
+                if(!error && data){
+                    state.currentProfile = data;
+                    renderProfileInfo(data);
+                    return;
+                }
+                if(error){
+                    console.warn('載入 users_profile 失敗:', error.message);
+                }
+            }catch(e){
+                console.warn('載入 users_profile 錯誤:', e.message);
+            }
+            renderProfileInfo(demoProfiles[0]);
+        }
+
+        function renderProfileInfo(profile){
+            const safe = v => v || '未設定';
+            document.getElementById('memberNickname').textContent = safe(profile.nickname);
+            document.getElementById('memberDistrict').textContent = '行政區：' + safe(profile.current_city || '未設定');
+            document.getElementById('memberAge').textContent = '年齡：' + safe(profile.age);
+            document.getElementById('memberCircle').textContent = '生活圈層：' + safe(profile.home_circle || '未指定');
+            document.getElementById('memberTags').innerHTML = (profile.tags || [])
+                .map(t=>`<span class="badge-quota">#${t}</span>`).join('');
+            document.getElementById('memberBio').textContent = safe(profile.bio);
+            document.getElementById('avatarPreview').src = profile.avatar_url || 'https://api.dicebear.com/7.x/notionists/svg?seed=預設';
+        }
+
+        async function loadProfileCards(){
+            const grid = document.getElementById('profileGrid');
+            if(!grid) return;
+            const all = [];
+            if(sbClient){
+                try{
+                    const{data} = await sbClient.from('users_profile').select('*').limit(12);
+                    if(data) all.push(...data);
+                }catch(e){}
+            }
+            if(all.length===0){ all.push(...demoProfiles); }
+            grid.innerHTML = all.map(p=>{
+                const circle = p.circle_code || '未指定';
+                const quota = p.free_meet_quota ?? 3;
+                const isMe = p.id === state.currentUser?.id;
+                return `
+                    <div class="bg-white rounded-xl shadow-md overflow-hidden card-hover">
+                        <div class="relative">
+                            <img src="${p.avatar_url || 'https://api.dicebear.com/7.x/notionists/svg?seed=預設'}"
+                                 alt="${p.nickname}"
+                                 class="w-full h-40 object-cover"
+                                 onerror="this.src='https://api.dicebear.com/7.x/notionists/svg?seed=預設'">
+                            <div class="absolute bottom-2 right-2 bg-white/90 rounded-full px-3 py-1 shadow">
+                                <span class="text-sm font-bold text-green-700">${p.age}歲</span>
+                            </div>
+                            ${isMe?'<div class="absolute top-2 left-2 bg-green-500 text-white rounded-full px-3 py-1 text-xs font-bold">我</div>':''}
+                        </div>
+                        <div class="p-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="text-lg font-bold text-gray-800">${p.nickname}</h3>
+                                <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">${p.district||'未指定行政區'}</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-2">${p.bio}</p>
+                            <div class="flex flex-wrap gap-1 mb-3">${(p.tags||[]).map(t=>`<span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">#${t}</span>`).join('')}</div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-gray-400">${circle}</span>
+                                <div class="flex gap-2">
+                                    <button class="btn-primary flex-1 text-sm font-bold py-2 px-3 rounded-lg" data-uid="${p.id}">💬 私訊</button>
+                                    <button class="bg-amber-100 hover:bg-amber-200 text-amber-800 font-bold py-2 px-3 rounded-lg text-sm flex-shrink-0" data-uid="${p.id}">📅 60分見面</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            grid.querySelectorAll('[data-uid]').forEach(btn=>{
+                btn.addEventListener('click',()=>{
+                    const uid = btn.dataset.uid;
+                    if(uid===state.currentUser?.id) return;
+                    state.selectedPartner = {id:uid, nickname:btn.textContent.trim()};
+                    if(state.currentUser){ showChat(); }
+                    else { alert('請先登入以使用私訊功能！'); }
+                });
+            });
+        }
+
+        function showEditProfile(){
+            if(!state.currentUser) return;
+            const nickname = prompt('暱稱:', state.currentProfile?.nickname || '');
+            if(!nickname) return;
+            const age = prompt('年齡:', state.currentProfile?.age || 25);
+            if(!age || isNaN(age)) return;
+            const district = prompt('行政區:', state.currentProfile?.district || '北區');
+            const bio = prompt('自我介紹:', state.currentProfile?.bio || '');
+            const tags = prompt('興趣標籤（逗號分隔）:', (state.currentProfile?.tags||[]).join(','));
+            const tagArray = tags ? tags.split(',').map(t=>t.trim()).filter(Boolean) : [];
+
+            const target = sbClient?.from('users_profile');
+            if(!target){ alert('系統錯誤：Supabase 連線失敗'); return; }
+
+            // 只寫實際存在的欄位
+            const updateData = {
+                nickname,
+                age: parseInt(age),
+                district,
+                bio,
+                tags: tagArray
+            };
+
+            target.update(updateData)
+                .eq('id', state.currentUser.id)
+                .then(()=>{
+                    state.currentProfile = {...state.currentProfile, ...updateData};
+                    renderProfileInfo(state.currentProfile);
+                    alert('個人資料已更新！');
+                })
+                .catch(err=>{
+                    alert('更新錯誤：' + err.message);
+                    console.error('更新 users_profile 失敗:', err);
+                });
+        }
+
+        // ─── 登入／註冊 ─────────────────────────────────────────
+        async function onAuthSubmit(e){
+            e.preventDefault();
+            const mode = document.getElementById('authMode').value;
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const circle = document.getElementById('circleSelect').value;
+
+            if(!email || !password){ alert('請填寫完整資料'); return; }
+            if(!sbClient){ alert('系統錯誤：Supabase 連線失敗'); return; }
+
+            try{
+                if(mode==='signup'){
+                    const {data,error} = await sbClient.auth.signUp({email,password});
+                    if(error) throw error;
+
+                    // 寫入 users_profile 只使用實際存在的欄位
+                    const profileInsert = {
+                        id: data.user.id,
+                        nickname: email.split('@')[0] || '新會員',
+                        avatar_url: `https://api.dicebear.com/7.x/notionists/svg?seed=${data.user.id}`,
+                        iso_country_code: 'TW',
+                        current_city: 'Taichung',
+                        home_circle: circle || 'UNI_ROOKIE',
+                        free_meet_quota: 3,
+                        created_at: new Date().toISOString()
+                    };
+                    const {error: insertError} = await sbClient
+                        .from('users_profile')
+                        .insert(profileInsert);
+
+                    if(insertError){
+                        console.error('建立 users_profile 失敗:', insertError.message);
+                        alert('註冊成功！（已建立帳號，但個人檔案建立時發生誤差：' + insertError.message + '）');
+                    } else {
+                        alert('註冊成功！請檢查您的電子郵件並點擊驗證連結。驗證後即可使用完整功能。');
+                    }
+                    document.getElementById('authModal').classList.add('hidden');
+                } else {
+                    const {data,error} = await sbClient.auth.signInWithPassword({email,password});
+                    if(error) throw error;
+                    state.currentUser = data.user;
+                    showAppView();
+                    await loadProfileData();
+                    await loadProfileCards();
+                }
+            }catch(err){
+                // 顯示具體錯誤訊息，方便除錯
+                alert('發生錯誤：' + err.message);
+                console.error('onAuthSubmit 錯誤:', err);
+            }
+        }
     </script>
 </body>
 </html>
