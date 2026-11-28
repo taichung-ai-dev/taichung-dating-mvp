@@ -16,6 +16,10 @@
         .card-hover:hover{ box-shadow:0 8px 24px rgba(0,0,0,.12); transform:translateY(-4px); }
         .btn-primary{ background-color:var(--primary); color:#fff; transition:all .2s; }
         .btn-primary:hover{ background-color:var(--primary-hover); transform:translateY(-1px); }
+        .btn-google{ background-color:#fff; border:1px solid #ddd; color:#333; transition:all .2s; }
+        .btn-google:hover{ background:#f8f9fa; border-color:#ccc; }
+        .btn-facebook{ background-color:#1877F2; color:#fff; transition:all .2s; }
+        .btn-facebook:hover{ background:#0d66c3; }
         .modal-overlay{ background:rgba(0,0,0,.5); backdrop-filter:blur(4px); }
         .avatar-ring{ width:80px; height:80px; border-radius:50%; border:4px solid var(--primary); object-fit:cover; }
         .badge-quota{ background:linear-gradient(135deg,#fef3c7,#fde68a); color:#92400e; border:1px solid #fcd34d; border-radius:999px; padding:4px 12px; font-size:.8rem; font-weight:600; }
@@ -42,7 +46,30 @@
         .tab-btn:hover:not(.active){ background:#f0fdf4; border-color:#86efac; }
         .dropdown-select{ appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; padding-right:40px; cursor:pointer; }
         .debug-block{ background:#1a1a2e; color:#00ff00; padding:16px; border-radius:8px; font-family:'Courier New',monospace; font-size:.8rem; white-space:pre-wrap; max-height:300px; overflow-y:auto; margin-top:8px; }
-        .error-toast{ position:fixed; bottom:20px; right:20px; background:#ef4444; color:#fff; padding:12px 20px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,.2); z-index:9999; max-width:400px; font-size:.9rem; }
+        .error-block{ background:#fef2f2; color:#b91c1c; padding:12px; border-radius:8px; font-size:.9rem; border:1px solid #fecaca; }
+        .show-error{ border-color:#ef4444; background:#fef2f2; }
+        .password-toggle{ position:relative; }
+        .password-toggle input{ padding-right:100px; }
+        .password-toggle .toggle-icon{ position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer; color:#6b7280; }
+        .circle-group-header{ font-weight:700; color:#1f2937; padding:8px 12px; background:#f0fdf4; border:1px solid #86efac; border-radius:8px; cursor:pointer; }
+        .select-option{ padding:10px 16px; font-size:1rem; }
+
+        /* 圈層選擇彈窗樣式 */
+        #circleSelectModal { backdrop-filter:blur(8px); background:rgba(255,255,255,.95); }
+        #circleSelectModal .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #e5e7eb; }
+        #circleSelectModal .modal-body { padding: 20px; max-height: 60vh; overflow-y: auto; }
+        .circle-category { margin-bottom: 20px; }
+        .circle-category .category-title { font-weight: 700; color: #1f2937; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #10b981; font-size: 1.1rem; }
+        .circle-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; cursor: pointer; transition: all 0.2s; margin-bottom: 6px; }
+        .circle-item:hover { border-color: #10b981; background: #f0fdf4; }
+        .circle-item.selected { border-color: #10b981; background: #ecfdf5; box-shadow: 0 0 0 3px rgba(16,185,129,.2); }
+        .circle-item .circle-code { font-size: .85rem; color: #6b7280; font-family: monospace; }
+        .circle-item .circle-name { font-weight: 600; }
+        .circle-item input[type="radio"] { width: 18px; height: 18px; accent-color: #10b981; }
+
+        /* 返回按鈕 */
+        .back-btn { background: none; border: none; color: #6b7280; cursor: pointer; padding: 8px 16px; border-radius: 8px; transition: all 0.2s; }
+        .back-btn:hover { color: #1f2937; background: #f3f4f6; }
     </style>
 </head>
 <body class="min-h-screen">
@@ -62,28 +89,67 @@
         </div>
     </nav>
 
-    <!-- 登入／註冊彈窗 -->
+    <!-- ─── 登入／註冊彈窗 ─── -->
     <div id="authModal" class="modal-overlay fixed inset-0 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl slide-in">
+        <div class="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl slide-in max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-bold text-gray-800" id="authTitle">註冊新帳號</h2>
                 <button id="closeAuth" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
             </div>
+
+            <!-- 社交登入按鈕 (置頂) -->
+            <div class="flex gap-4 mb-6">
+                <button id="googleLoginBtn" class="btn-google flex-1 flex items-center justify-center gap-2 py-3 rounded-lg">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c1.87-2.12 2.9-5.33 2.9-8.83z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.48-.79-.74-1.69-.74-2.63s.26-1.84.74-2.63l3.57-2.77c1.87.79 4.05 1.26 6.16 1.26 3.59 0 6.64-2.06 7.67-4.92L13 6.39l-3.57 2.77z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 15.13 1 12 1 7.7 1 3.99 3.47 2.18 7.23l3.57 2.77c.87-2.6 3.28-4.53 6.16-4.53z"/></svg>
+                    使用 Google 帳號繼續
+                </button>
+                <button id="facebookLoginBtn" class="btn-facebook flex-1 flex items-center justify-center gap-2 py-3 rounded-lg">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c1.87-2.12 2.9-5.33 2.9-8.83z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.48-.79-.74-1.69-.74-2.63s.26-1.84.74-2.63l3.57-2.77c1.87.79 4.05 1.26 6.16 1.26 3.59 0 6.64-2.06 7.67-4.92L13 6.39l-3.57 2.77z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 15.13 1 12 1 7.7 1 3.99 3.47 2.18 7.23l3.57 2.77c.87-2.6 3.28-4.53 6.16-4.53z"/></svg>
+                    使用 Facebook 帳號繼續
+                </button>
+            </div>
+
+            <!-- 註冊表單 -->
             <form id="authForm" class="space-y-4">
                 <input type="hidden" id="authMode" value="signup">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">暱稱</label>
+                    <input type="text" id="nicknameInput" required class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="你的暱稱" maxlength="50">
+                </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">電子郵件</label>
                     <input type="email" id="email" required class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="you@example.com">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">密碼</label>
-                    <input type="password" id="password" required minlength="6" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="至少 6 碼">
+                    <div class="password-toggle">
+                        <input type="password" id="password" required minlength="6" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="至少 6 個字元">
+                        <span class="toggle-icon" id="passwordToggle">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                        </span>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">密碼至少需要 6 個字元</p>
+                    <p id="passwordError" class="text-xs text-red-500 mt-1 hidden">⚠️ 兩次密碼輸入不一致，請重新輸入</p>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">生活圈層（選填）</label>
-                    <select id="circleSelect" class="dropdown-select w-full border border-gray-300 rounded-lg px-4 py-3"></select>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">再次確認密碼</label>
+                    <div class="password-toggle">
+                        <input type="password" id="passwordConfirm" required class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="再次輸入密碼">
+                        <span class="toggle-icon" id="passwordConfirmToggle">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                        </span>
+                    </div>
                 </div>
-                <button type="submit" class="w-full btn-primary font-bold py-3 rounded-lg"><span id="submitBtnText">註冊</span></button>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">生活圈層 <span class="text-red-500">*</span></label>
+                    <select id="circleSelect" class="dropdown-select w-full border border-gray-300 rounded-lg px-4 py-3" required>
+                        <option value="">—— 請選擇生活圈層 ——</option>
+                    </select>
+                </div>
+                <div id="formError" class="text-red-500 text-sm hidden"></div>
+                <button type="submit" class="w-full btn-primary font-bold py-3 rounded-lg">
+                    <span id="submitBtnText">註冊</span>
+                </button>
             </form>
             <div class="mt-4 text-center">
                 <button id="toggleAuthMode" class="text-sm text-green-600 hover:underline">已有帳號？立即登入</button>
@@ -91,61 +157,79 @@
         </div>
     </div>
 
-    <!-- 訪客體驗 -->
-    <main class="max-w-7xl mx-auto px-4 py-8">
-        <section id="guestView" class="space-y-10 fade-in">
-            <div class="text-center py-12">
-                <h1 class="text-5xl font-bold text-gray-800 mb-4">歡迎來到台中跑咖 🏃‍♂️</h1>
-                <p class="text-xl text-gray-600 mb-8">探索湖旁山區與老街好去處，一起找到你的跑友、尋伴與新朋友</p>
-                <button id="startExploring" class="bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-xl text-xl transition transform hover:scale-105">開始自由體驗</button>
+    <!-- ─── 圈層選擇彈窗（OAuth 登入後補全資料用）─── -->
+    <div id="circleSelectModal" class="modal-overlay fixed inset-0 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl w-full max-w-3xl h-4/5 flex flex-col shadow-2xl slide-in">
+            <div class="modal-header">
+                <h2 class="text-2xl font-bold text-gray-800">選擇您的生活圈層</h2>
+                <button class="back-btn" id="closeCircleSelect">&times;</button>
             </div>
-            <div>
-                <h2 class="text-2xl font-bold text-gray-800 mb-4">🏔️ 不同的生活圈層</h2>
-                <p class="text-gray-600 mb-6">每個圈層都在說自己的故事，找一個與你專業／生活型態契合的圈層吧！</p>
-                <div id="roleGrid" class="role-grid"></div>
+            <div class="modal-body">
+                <!-- 圈層選項將由 JS 動態填入 -->
+                <div id="circleList"></div>
             </div>
-        </section>
+            <div class="modal-footer p-4 border-t">
+                <button id="confirmCircleSelect" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg">確認並加入</button>
+            </div>
+        </div>
+    </div>
 
-        <!-- 登入後介面 -->
-        <section id="appView" class="hidden space-y-10 fade-in">
-            <div class="flex justify-between items-center">
-                <h1 class="text-3xl font-bold text-gray-800">探索夥伴</h1>
-                <button id="logoutBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">登出</button>
-            </div>
-            <div class="bg-white rounded-xl shadow-md p-6 card-hover">
-                <h2 class="text-xl font-bold text-gray-800 mb-4">我的個人資訊</h2>
-                <div class="flex items-center space-x-4">
-                    <img id="avatarPreview" class="avatar-ring" src="" alt="頭像" onerror="this.src='https://api.dicebear.com/7.x/notionists/svg?seed=預設'">
-                    <div class="flex-1 min-w-0">
-                        <p class="font-bold text-gray-800 truncate" id="memberNickname"></p>
-                        <p class="text-sm text-gray-500" id="memberDistrict"></p>
-                        <p class="text-sm text-gray-500" id="memberAge"></p>
-                    </div>
+    <!-- 訪客體驗 -->
+    <main id="guestView" class="max-w-7xl mx-auto px-4 py-8">
+        <div class="text-center py-12">
+            <h1 class="text-5xl font-bold text-gray-800 mb-4">歡迎來到台中跑咖 🏃‍♂️</h1>
+            <p class="text-xl text-gray-600 mb-8">探索湖旁山區與老街好去處，一起找到你的跑友、尋伴與新朋友</p>
+            <button id="startExploring" class="bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-xl text-xl transition transform hover:scale-105">開始自由體驗</button>
+        </div>
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">🏔️ 不同的生活圈層</h2>
+            <p class="text-gray-600 mb-6">每個圈層都在說自己的故事，找一個與您專業／生活型態契合的圈層吧！</p>
+            <div id="roleGrid" class="role-grid"></div>
+        </div>
+    </main>
+
+    <!-- 登入後介面 -->
+    <main id="appView" class="hidden max-w-7xl mx-auto px-4 py-8">
+        <div class="flex justify-between items-center">
+            <h1 class="text-3xl font-bold text-gray-800">探索夥伴</h1>
+            <button id="logoutBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">登出</button>
+        </div>
+        <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">我的個人資訊</h2>
+            <div class="flex items-center space-x-4">
+                <img id="avatarPreview" class="avatar-ring" src="" alt="頭像" onerror="this.src='https://api.dicebear.com/7.x/notionists/svg?seed=預設'">
+                <div class="flex-1 min-w-0">
+                    <p class="font-bold text-gray-800 truncate" id="memberNickname"></p>
+                    <p class="text-sm text-gray-500" id="memberDistrict"></p>
+                    <p class="text-sm text-gray-500" id="memberAge"></p>
                 </div>
-                <div class="mt-3"><p class="font-medium text-gray-700 mb-1">生活圈層</p><p id="memberCircle" class="text-sm text-gray-600"></p></div>
-                <div class="mt-2"><p class="font-medium text-gray-700 mb-1">興趣標籤</p><div id="memberTags" class="flex flex-wrap gap-2"></div></div>
-                <div class="mt-3"><p class="font-medium text-gray-700 mb-1">自我介紹</p><p id="memberBio" class="text-gray-600"></p></div>
-                <div class="mt-4 flex flex-wrap gap-3 border-t border-gray-100 pt-4">
-                    <button id="editProfileBtn" class="btn-outline px-4 py-2 rounded-lg">✏️ 編輯個人資料</button>
-                    <button id="chatBtn" class="btn-primary px-4 py-2 rounded-lg">💬 即時聊天室</button>
-                    <button id="postsBtn" class="btn-outline px-4 py-2 rounded-lg">📸 動態牆</button>
-                </div>
             </div>
-            <div class="space-y-8">
-                <div class="flex justify-between items-center"><h2 class="text-2xl font-bold text-gray-800">正在探索</h2><span class="text-sm text-gray-500">快看眼前這幾位！</span></div>
-                <div id="profileGrid" class="role-grid"></div>
+            <div class="mt-3"><p class="font-medium text-gray-700 mb-1">生活圈層</p><p id="memberCircle" class="text-sm text-gray-600"></p></div>
+            <div class="mt-2"><p class="font-medium text-gray-700 mb-1">興趣標籤</p><div id="memberTags" class="flex flex-wrap gap-2"></div></div>
+            <div class="mt-3"><p class="font-medium text-gray-700 mb-1">自我介紹</p><p id="memberBio" class="text-gray-600"></p></div>
+            <div class="mt-4 flex flex-wrap gap-3 border-t border-gray-100 pt-4">
+                <button id="editProfileBtn" class="btn-outline px-4 py-2 rounded-lg">✏️ 編輯個人資料</button>
+                <button id="chatBtn" class="btn-primary px-4 py-2 rounded-lg">💬 即時聊天室</button>
+                <button id="postsBtn" class="btn-outline px-4 py-2 rounded-lg">📸 動態牆</button>
             </div>
-        </section>
+        </div>
+        <div class="space-y-8">
+            <div class="flex justify-between items-center"><h2 class="text-2xl font-bold text-gray-800">正在探索</h2><span class="text-sm text-gray-500">快看眼前這幾位！</span></div>
+            <div id="profileGrid" class="role-grid"></div>
+        </div>
     </main>
 
     <!-- 聊天室彈窗 -->
     <div id="chatModal" class="modal-overlay fixed inset-0 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-2xl w-full max-w-3xl h-3/4 flex flex-col shadow-2xl slide-in">
-            <div class="flex justify-between items-center p-4 border-b flex-wrap gap-2"><h2 class="text-xl font-bold text-gray-800">💬 即時聊天室</h2><button id="closeChat" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button></div>
+            <div class="flex justify-between items-center p-4 border-b flex-wrap gap-2">
+                <h2 class="text-xl font-bold text-gray-800">💬 即時聊天室</h2>
+                <button id="closeChat" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+            </div>
             <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide"></div>
             <div class="p-4 border-t flex space-x-3">
                 <input id="chatInput" class="flex-1 border border-gray-300 rounded-lg px-4 py-3" placeholder="輸入訊息...按 Enter 發送" maxlength="500">
-                <button id="sendMessage" class="btn-primary px-6 py-3 rounded-lg font-medium whitespace-nowrap">發送</button>
+                <button id="sendMessage" class="btn-primary px-6 py-3 rounded-lg font-medium">發送</button>
             </div>
         </div>
     </div>
@@ -153,7 +237,10 @@
     <!-- 動態牆彈窗 -->
     <div id="postsModal" class="modal-overlay fixed inset-0 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-2xl w-full max-w-4xl h-4/5 flex flex-col shadow-2xl slide-in">
-            <div class="flex justify-between items-center p-4 border-b flex-wrap gap-2"><h2 class="text-xl font-bold text-gray-800">📸 圈層動態牆</h2><button id="closePosts" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button></div>
+            <div class="flex justify-between items-center p-4 border-b flex-wrap gap-2">
+                <h2 class="text-xl font-bold text-gray-800">📸 圈層動態牆</h2>
+                <button id="closePosts" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+            </div>
             <div id="postsList" class="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-hide"></div>
             <div class="p-4 border-t flex space-x-3">
                 <input id="postInput" class="flex-1 border border-gray-300 rounded-lg px-4 py-3" placeholder="發布一則動態…" maxlength="500">
@@ -165,7 +252,9 @@
     <!-- 配對成功彈窗 -->
     <div id="matchModal" class="modal-overlay fixed inset-0 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-2xl p-8 text-center shadow-2xl max-w-md mx-4 slide-in">
-            <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6"><svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></div>
+            <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            </div>
             <h2 class="text-3xl font-bold text-gray-800 mb-3">🎉 配對成功！</h2>
             <p class="text-gray-600 mb-6">你和 <span id="matchedNickname" class="font-bold text-green-700"></span> 互相喜歡，開始一段新的旅程吧！</p>
             <button id="closeMatch" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-xl transition">開始私訊</button>
@@ -216,48 +305,66 @@
             pendingLikes: new Set(),
             isGuestMode: false,
             currentTab: 'profiles',
-            circleSubscription: null
+            circleSubscription: null,
+            oauthLoginComplete: false
         };
 
-        // ─── 4 位示範角色（內建備援）───
-        const demoProfiles = [
-            { id:'demo_1', nickname:'大雄', age:26, district:'北屯區', circle_code:'TECH_DEV',
-              bio:'每週至少爬一座山！對於任何登山路線充滿熱情。也喜歡拍攝風景，期待和你一起發現台中美麗的角落。',
-              tags:['登山','風景攝影','徒步旅行','徒步','爬山'],
-              avatar_url:'https://api.dicebear.com/7.x/notionists/svg?seed=大雄' },
-            { id:'demo_2', nickname:'美玉', age:24, district:'西屯區', circle_code:'MED_SHIFT',
-              bio:'熱愛生活，喜歡在周末一起爬山、拍照、吃美食。有一個好的伴侶能讓每一天都更精彩！',
-              tags:['攀登','運動','美食','攝影','旅行'],
-              avatar_url:'https://api.dicebear.com/7.x/notionists/svg?seed=美玉' },
-            { id:'demo_3', nickname:'志堅', age:28, district:'南屯區', circle_code:'ACG_CORE',
-              bio:'痴迷大自然，周末總是找地方跑。希望找到一個能一起放空、聊天、探索的小夥伴。',
-              tags:['自然','徒步','星空愛好者','喝咖啡','散步'],
-              avatar_url:'https://api.dicebear.com/7.x/notionists/svg?seed=志堅' },
-            { id:'demo_4', nickname:'念媛', age:25, district:'北區', circle_code:'UNI_ROOKIE',
-              bio:'喜歡用相機記錄每一個細微之處，重視生活的品質。期待遇到有趣的人一起慢跑、拍照、探險。',
-              tags:['攝影','慢跑','藝術','咖啡店','攝影'],
-              avatar_url:'https://api.dicebear.com/7.x/notionists/svg?seed=念媛' }
+        // ─── 30 個圈層內建備援清單（本地備援）───
+        // 依照 category_group 分組，共 30 個圈層
+        const BUILTIN_CIRCLES = [
+            // 【銀髮樂齡館 - Senior】
+            { circle_code:'SENIOR_GOLD', category_group:'銀髮樂齡館', display_name_zh: '樂齡黃昏青春圈', display_name_en:'Golden Senior Circle' },
+            { circle_code:'SENIOR_CRAFT', category_group:'銀髮樂齡館', display_name_zh: '銀髮工藝圈', display_name_en:'Craft Seniors' },
+            { circle_code:'SENIOR_FIT', category_group:'銀髮樂齡館', display_name_zh: '銀髮運動圈', display_name_en:'Active Seniors' },
+            { circle_code:'SENIOR_GARDEN', category_group:'銀髮樂齡館', display_name_zh: '銀髮園藝圈', display_name_en:'Garden Seniors' },
+            { circle_code:'SENIOR_SOCIETY', category_group:'銀髮樂齡館', display_name_zh: '銀髮友善圈', display_name_en:'Senior Friendship' },
+            // 【校園新手館 - Campus】
+            { circle_code:'UNI_ROOKIE', category_group:'校園新手館', display_name_zh: '校園戀愛新手村', display_name_en:'Campus Rookies' },
+            { circle_code:'UNI_PARTY', category_group:'校園新手館', display_name_zh: '校園派對社', display_name_en:'Campus Party' },
+            { circle_code:'UNI_STUDY', category_group:'校園新手館', display_name_zh: '校園學習部', display_name_en:'Study Club' },
+            { circle_code:'UNI_ART', category_group:'校園新手館', display_name_zh: '校園文藝社', display_name_en:'Campus Arts' },
+            { circle_code:'UNI_SPORTS', category_group:'校園新手館', display_name_zh: '校園運動社', display_name_en:'Campus Sports' },
+            // 【高壓精英館 - Career】
+            { circle_code:'TECH_DEV', category_group:'高壓精英館', display_name_zh: '科技爆肝研發圈', display_name_en:'Tech & R&D Engineers' },
+            { circle_code:'TECH_SALES', category_group:'高壓精英館', display_name_zh: '科技行銷圈', display_name_en:'Tech Marketing' },
+            { circle_code:'MED_SHIFT', category_group:'高壓精英館', display_name_zh: '輪班制白衣天使', display_name_en:'Shift Medical Angels' },
+            { circle_code:'MED_ADMIN', category_group:'高壓精英館', display_name_zh: '醫療行政圈', display_name_en:'Medical Admin' },
+            { circle_code:'FINANCE_TECH', category_group:'高壓精英館', display_name_zh: '金融科技圈', display_name_en:'FinTech Hub' },
+            // 【生活共鳴館 - Hobby】
+            { circle_code:'ACG_CORE', category_group:'生活共鳴館', display_name_zh: '硬核二次元同好圈', display_name_en:'Anime & Gaming Core' },
+            { circle_code:'FOODIE', category_group:'生活共鳴館', display_name_zh: '美食探索者', display_name_en:'Food Explorer' },
+            { circle_code:'TRAVELER', category_group:'生活共鳴館', display_name_zh: '自由旅行者', display_name_en:'Traveler' },
+            { circle_code:'CARLIFE', category_group:'生活共鳴館', display_name_zh: '車輪人生', display_name_en:'Car Life' },
+            { circle_code:'BOOKWORM', category_group:'生活共鳴館', display_name_zh: '書劫鐵匠', display_name_en:'Bookworm' },
+            // 【特殊地理館 - Special】
+            { circle_code:'POLAR_BEACON', category_group:'特殊地理館', display_name_zh: '極地孤獨燈塔圈', display_name_en:'Polar Expedition Beacon' },
+            { circle_code:'KR_OPTIN', category_group:'特殊地理館', display_name_zh: '朝鮮安全池', display_name_en:'Korea Safe Pool' },
+            { circle_code:'GLOBAL_ANON', category_group:'特殊地理館', display_name_zh: '匿名保護池', display_name_en:'Global Anonymity Pool' },
+            { circle_code:'CN_OPEN', category_group:'特殊地理館', display_name_zh: '大陸開放池', display_name_en:'China Open Pool' },
+            { circle_code:'SEA_SHARED', category_group:'特殊地理館', display_name_zh: '海域交流池', display_name_en:'Sea Shared Pool' },
+            // 【創作者社群】
+            { circle_code:'CREATOR', category_group:'創作者社群', display_name_zh: '創作者社群', display_name_en:'Creator Community' },
+            { circle_code:'VOLUNTEER', category_group:'創作者社群', display_name_zh: '志工輪迴', display_name_en:'Volunteer Rotation' },
+            { circle_code:'MOVIE_BAUD', category_group:'創作者社群', display_name_zh: '影音劇迷圈', display_name_en:'Movie & Poetry' },
+            { circle_code:'SPORTS_DIVERSE', category_group:'創作者社群', display_name_zh: '運動多樣者', display_name_en:'Diverse Sports' },
+            { circle_code:'BREAKFAST_CLUB', category_group:'創作者社群', display_name_zh: '早餐與美食俱樂部', display_name_en:'Breakfast Club' }
         ];
 
-        // ──────────────────────────────────────────────────────────
-        // 初始化 (修正: 訪客模式不讀 users_profile)
-        // ──────────────────────────────────────────────────────────
+        // ─── 初始化 (防止 RLS 報錯) ─────────────────────────────
         document.addEventListener('DOMContentLoaded',async()=>{
             try{
                 await initSupabase();
                 setupEventListeners();
                 showGuestView();
                 await loadCircles();
-                // 訪客模式：不讀取 users_profile（RLS 保護），直接使用內建 demo 資料
                 if(state.currentUser){
                     await loadRoleData();
+                    await refreshApp();
                 } else {
                     renderRoleCards(demoProfiles);
                 }
-                if(state.currentUser){ await refreshApp(); }
                 console.log('✅ MVP 初始化完成');
             }catch(err){
-                // 訪客模式下，僅讀取受保護資料表失敗屬正常現象，僅記錄
                 if(err && err.message && err.message.includes('users_profile')){
                     console.warn('（訪客模式）忽略 users_profile 讀取錯誤:', err.message);
                 } else {
@@ -274,9 +381,10 @@
             });
             document.addEventListener('keydown',e=>{
                 if(e.key==='Escape'){
-                    document.querySelectorAll('.modal-overlay:not(#postsModal)').forEach(m=>m.classList.add('hidden'));
+                    document.querySelectorAll('.modal-overlay:not(#postsModal):not(#circleSelectModal)').forEach(m=>m.classList.add('hidden'));
                 }
             });
+            // 通用按鈕
             document.getElementById('guestBtn')?.addEventListener('click',()=>{ state.isGuestMode=true; showGuestView(); });
             document.getElementById('loginBtn')?.addEventListener('click',()=>{ showAuth('login'); });
             document.getElementById('signupBtn')?.addEventListener('click',()=>{ showAuth('signup'); });
@@ -287,26 +395,65 @@
             document.getElementById('postsBtn')?.addEventListener('click',()=>{ showPosts(); });
             document.getElementById('toggleAuthMode')?.addEventListener('click',toggleAuthMode);
             document.getElementById('closeAuth')?.addEventListener('click',()=>document.getElementById('authModal').classList.add('hidden'));
+
+            // 密碼顯示/隱藏
+            const passwordToggle = document.getElementById('passwordToggle');
+            const passwordConfirmToggle = document.getElementById('passwordConfirmToggle');
+            passwordToggle?.addEventListener('click',()=>{
+                const input = document.getElementById('password');
+                const type = input.getAttribute('type')==='password'?'text':'password';
+                input.setAttribute('type',type);
+                this.querySelector('svg').innerHTML = type==='password'?
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>' :
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>';
+            });
+            passwordConfirmToggle?.addEventListener('click',()=>{
+                const input = document.getElementById('passwordConfirm');
+                const type = input.getAttribute('type')==='password'?'text':'password';
+                input.setAttribute('type',type);
+                this.querySelector('svg').innerHTML = type==='password'?
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>' :
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>';
+            });
+
+            // 社交登入
+            document.getElementById('googleLoginBtn')?.addEventListener('click',onGoogleLogin);
+            document.getElementById('facebookLoginBtn')?.addEventListener('click',onFacebookLogin);
+
+            // 表單處理
             document.getElementById('authForm')?.addEventListener('submit',onAuthSubmit);
+            document.getElementById('closeAuth')?.addEventListener('click',()=>document.getElementById('authModal').classList.add('hidden'));
+
+            // 聊天室
             document.getElementById('closeChat')?.addEventListener('click',()=>{ document.getElementById('chatModal').classList.add('hidden'); });
             document.getElementById('sendMessage')?.addEventListener('click',sendMessage);
             document.getElementById('chatInput')?.addEventListener('keypress',e=>{ if(e.key==='Enter') sendMessage(); });
+
+            // 動態牆
+            document.getElementById('postButton')?.addEventListener('click',postUpdate);
+            document.getElementById('postInput')?.addEventListener('keypress',e=>{ if(e.key==='Enter') postUpdate(); });
             document.getElementById('closePosts')?.addEventListener('click',()=>document.getElementById('postsModal').classList.add('hidden'));
+
+            // 配對成功
+            document.getElementById('closeMatch')?.addEventListener('click',()=>document.getElementById('matchModal').classList.add('hidden'));
             document.getElementById('inviteBtn')?.addEventListener('click',()=>{
                 document.getElementById('matchModal').classList.add('hidden');
                 showMatchInvite();
             });
-            document.getElementById('closeMatch')?.addEventListener('click',()=>document.getElementById('matchModal').classList.add('hidden'));
-            document.getElementById('circleSelect')?.addEventListener('change',loadCircles);
-            document.getElementById('roleGrid')?.addEventListener('click',e=>{
-                const card = e.target.closest('.role-card');
-                if(card){ const id = card.dataset.profileId; if(state.currentUser){ handleLikeFromCard(id); } else { alert('請先登入以互動！'); } }
+
+            // 圈層選擇彈窗
+            document.getElementById('circleList')?.addEventListener('change',onCircleSelectChange);
+            document.getElementById('confirmCircleSelect')?.addEventListener('click',confirmCircleSelect);
+            document.getElementById('closeCircleSelect')?.addEventListener('click',()=>{
+                document.getElementById('circleSelectModal').classList.add('hidden');
+                document.getElementById('circleSelectModal').innerHTML = '<div class="modal-header"><h2 class="text-2xl font-bold text-gray-800">選擇您的生活圈層</h2><button class="back-btn" id="closeCircleSelect2">&times;</button></div><div id="circleList"></div>';
             });
         }
 
         // ─── 顯示邏輯 ───────────────────────────────────────────
         function showAuth(mode){
             state.isGuestMode = false;
+            state.oauthLoginComplete = false;
             document.getElementById('authTitle').textContent = mode==='login'?'登入帳號':'立即註冊';
             document.getElementById('authMode').value = mode;
             document.getElementById('submitBtnText').textContent = mode==='login'?'登入':'註冊';
@@ -345,37 +492,72 @@
             showGuestView();
         }
 
-        // ─── 圈層列表 ───────────────────────────────────────────
+        // ─── 圈層載入 ───────────────────────────────────────────
         async function loadCircles(){
             const select = document.getElementById('circleSelect');
             if(!sbClient) return;
             try{
-                const {data,error} = await sbClient.from('circles_master').select('circle_code,display_name');
-                if(error){ console.warn('載入圈層失敗:', error.message); return; }
-                select.innerHTML = '<option value="">—— 選擇生活圈層 ——</option>';
-                (data||[]).forEach(c=>{
-                    const display = c.display_name?.zh_TW || c.display_name?.zh || c.circle_code || '未命名';
+                const {data,error} = await sbClient.from('circles_master').select('circle_code,category_group,display_name');
+                if(error){ console.warn('載入圈層失敗，將使用內建備援:', error.message); }
+                else if(data && data.length > 0){
+                    // 由 Supabase 資料填充
+                    select.innerHTML = '<option value="">—— 請選擇生活圈層 ——</option>';
+                    const groups = {};
+                    (data||[]).forEach(c=>{
+                        const cat = c.category_group || '其他';
+                        if(!groups[cat]) groups[cat] = [];
+                        groups[cat].push({
+                            circle_code: c.circle_code,
+                            category_group: cat,
+                            name: c.display_name?.zh_TW || c.display_name?.zh || c.circle_code
+                        });
+                    });
+                    // 按 category_group 分組
+                    const sortedCategories = Object.keys(groups).sort();
+                    sortedCategories.forEach(cat=>{
+                        const items = groups[cat];
+                        const optGroup = document.createElement('optgroup');
+                        optGroup.label = cat;
+                        items.forEach(item=>{
+                            const opt = document.createElement('option');
+                            opt.value = item.circle_code;
+                            opt.textContent = item.name || item.circle_code;
+                            optGroup.appendChild(opt);
+                        });
+                        select.appendChild(optGroup);
+                    });
+                    return;
+                }
+            }catch(err){ console.warn('圈層載入錯誤（降級為內建備援）:', err.message); }
+
+            // 內建備援：30 個圈層
+            select.innerHTML = '<option value="">—— 請選擇生活圈層 ——</option>';
+            const groups = {};
+            BUILTIN_CIRCLES.forEach(c=>{
+                if(!groups[c.category_group]) groups[c.category_group] = [];
+                groups[c.category_group].push(c);
+            });
+            const sortedCategories = Object.keys(groups).sort();
+            sortedCategories.forEach(cat=>{
+                const items = groups[cat];
+                const optGroup = document.createElement('optgroup');
+                optGroup.label = cat;
+                items.forEach(item=>{
                     const opt = document.createElement('option');
-                    opt.value = c.circle_code || '';
-                    opt.textContent = display || c.circle_code;
-                    select.appendChild(opt);
+                    opt.value = item.circle_code;
+                    opt.textContent = item.display_name_zh || item.circle_code;
+                    optGroup.appendChild(opt);
                 });
-            }catch(err){ console.warn('圈層載入錯誤:', err.message); }
+                select.appendChild(optGroup);
+            });
         }
 
         // ─── 角色數據 ───────────────────────────────────────────
         async function loadRoleData(){
-            // 訪客模式：不讀取 users_profile（RLS 保護），直接使用內建 demo 資料
-            if(!state.currentUser){
-                renderRoleCards(demoProfiles);
-                return;
-            }
-            if(!sbClient) { renderRoleCards(demoProfiles); return; }
+            if(!state.currentUser){ renderRoleCards(demoProfiles); return; }
+            if(!sbClient){ renderRoleCards(demoProfiles); return; }
             try{
-                const {data,error} = await sbClient
-                    .from('users_profile')
-                    .select('*')
-                    .limit(4);
+                const {data,error} = await sbClient.from('users_profile').select('*').limit(4);
                 if(!error && data && data.length > 0){
                     console.log('✅ 從 Supabase users_profile 載入角色:', data.length);
                     renderRoleCards(data);
@@ -384,7 +566,6 @@
             }catch(e){
                 console.warn('users_profile 載入錯誤（降級為內建資料）:', e.message);
             }
-            // 降級：使用內建 demo 資料
             renderRoleCards(demoProfiles);
         }
 
@@ -440,9 +621,7 @@
             }catch(e){
                 console.error('推送喜歡失敗:', e);
                 alert('已送出喜歡訊號，對方收到後會通知您！');
-            }finally{
-                state.pendingLikes.delete(profileId);
-            }
+            }finally{ state.pendingLikes.delete(profileId); }
         }
 
         function showMatchModal(profileId){
@@ -509,9 +688,7 @@
                     })
                     .subscribe();
                 console.log('✅ Realtime 連線已啟用：private_messages');
-            }catch(err){
-                console.warn('Realtime 連線錯誤（非嚴重）:', err.message);
-            }
+            }catch(err){ console.warn('Realtime 連線錯誤（非嚴重）:', err.message); }
         }
 
         async function loadChatMessages(){
@@ -543,9 +720,7 @@
                         </div>
                     `;
                 }).join('');
-            }catch(e){
-                container.innerHTML = '<p class="text-red-500 text-center py-8">載入訊息失敗</p>';
-            }
+            }catch(e){ container.innerHTML = '<p class="text-red-500 text-center py-8">載入訊息失敗</p>'; }
         }
 
         async function sendMessage(){
@@ -590,7 +765,6 @@
                         posts.push(...(postsRes||[]));
                     }
                 }
-                // 示範資料
                 posts.push({
                     post_id:'demo_1',
                     author_id: state.currentUser?.id || 'demo_user',
@@ -689,12 +863,8 @@
                     renderProfileInfo(data);
                     return;
                 }
-                if(error){
-                    console.warn('載入 users_profile 失敗:', error.message);
-                }
-            }catch(e){
-                console.warn('載入 users_profile 錯誤:', e.message);
-            }
+                if(error){ console.warn('載入 users_profile 失敗:', error.message); }
+            }catch(e){ console.warn('載入 users_profile 錯誤:', e.message); }
             renderProfileInfo(demoProfiles[0]);
         }
 
@@ -723,7 +893,6 @@
             if(all.length===0){ all.push(...demoProfiles); }
             grid.innerHTML = all.map(p=>{
                 const circle = p.circle_code || '未指定';
-                const quota = p.free_meet_quota ?? 3;
                 const isMe = p.id === state.currentUser?.id;
                 return `
                     <div class="bg-white rounded-xl shadow-md overflow-hidden card-hover">
@@ -781,13 +950,8 @@
             const target = sbClient?.from('users_profile');
             if(!target){ alert('系統錯誤：Supabase 連線失敗'); return; }
 
-            // 只寫實際存在的欄位
             const updateData = {
-                nickname,
-                age: parseInt(age),
-                district,
-                bio,
-                tags: tagArray
+                nickname, age: parseInt(age), district, bio, tags: tagArray
             };
 
             target.update(updateData)
@@ -803,15 +967,43 @@
                 });
         }
 
-        // ─── 登入／註冊 ─────────────────────────────────────────
+        // ─── 登入／註冊處理 ─────────────────────────────────────
         async function onAuthSubmit(e){
             e.preventDefault();
             const mode = document.getElementById('authMode').value;
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
+            const passwordConfirm = document.getElementById('passwordConfirm').value;
+            const nickname = document.getElementById('nicknameInput').value.trim();
             const circle = document.getElementById('circleSelect').value;
 
-            if(!email || !password){ alert('請填寫完整資料'); return; }
+            // 驗證：密碼一致性
+            if(mode==='signup' && password !== passwordConfirm){
+                const errEl = document.getElementById('passwordError');
+                errEl.classList.remove('hidden');
+                document.getElementById('passwordConfirm').classList.add('show-error');
+                document.getElementById('passwordConfirm').focus();
+                return;
+            }
+            // 驗證：暱稱
+            if(!nickname){
+                document.getElementById('formError').textContent = '⚠️ 請輸入暱稱';
+                document.getElementById('formError').classList.remove('hidden');
+                document.getElementById('nicknameInput').focus();
+                return;
+            }
+            // 驗證：生活圈層必選
+            if(!circle){
+                document.getElementById('formError').textContent = '⚠️ 生活圈層為必填項目';
+                document.getElementById('formError').classList.remove('hidden');
+                document.getElementById('circleSelect').focus();
+                return;
+            }
+            if(!email || !password){
+                document.getElementById('formError').textContent = '⚠️ 請填寫完整資料';
+                document.getElementById('formError').classList.remove('hidden');
+                return;
+            }
             if(!sbClient){ alert('系統錯誤：Supabase 連線失敗'); return; }
 
             try{
@@ -819,14 +1011,14 @@
                     const {data,error} = await sbClient.auth.signUp({email,password});
                     if(error) throw error;
 
-                    // 寫入 users_profile 只使用實際存在的欄位
+                    // 寫入 users_profile（僅實際存在的欄位）
                     const profileInsert = {
                         id: data.user.id,
-                        nickname: email.split('@')[0] || '新會員',
+                        nickname: nickname,
                         avatar_url: `https://api.dicebear.com/7.x/notionists/svg?seed=${data.user.id}`,
                         iso_country_code: 'TW',
                         current_city: 'Taichung',
-                        home_circle: circle || 'UNI_ROOKIE',
+                        home_circle: circle,
                         free_meet_quota: 3,
                         created_at: new Date().toISOString()
                     };
@@ -850,9 +1042,129 @@
                     await loadProfileCards();
                 }
             }catch(err){
-                // 顯示具體錯誤訊息，方便除錯
                 alert('發生錯誤：' + err.message);
                 console.error('onAuthSubmit 錯誤:', err);
+            }
+        }
+
+        // ─── 洽谷登入 ───────────────────────────────────────────
+        async function onGoogleLogin(){
+            if(!sbClient){ alert('尚未載入 Supabase SDK，請稍後再試'); return; }
+            try{
+                const {data,error} = await sbClient.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: { redirectTo: window.location.origin + window.location.pathname }
+                });
+                if(error){ alert('Google 登入失敗：' + error.message); }
+            }catch(e){ alert('Google 登入失敗：' + e.message); }
+        }
+
+        async function onFacebookLogin(){
+            if(!sbClient){ alert('尚未載入 Supabase SDK，請稍後再試'); return; }
+            try{
+                const {data,error} = await sbClient.auth.signInWithOAuth({
+                    provider: 'facebook',
+                    options: { redirectTo: window.location.origin + window.location.pathname }
+                });
+                if(error){ alert('Facebook 登入失敗：' + error.message); }
+            }catch(e){ alert('Facebook 登入失敗：' + e.message); }
+        }
+
+        // ─── 圈層選擇彈窗（OAuth 後補全） ──────────────────────
+        function showCircleSelectModal(){
+            const select = document.getElementById('circleSelect');
+            if(!select || select.innerHTML.includes('circle-select-modal')) return;
+
+            const modal = document.getElementById('circleSelectModal');
+            modal.innerHTML = `
+                <div class="modal-header">
+                    <h2 class="text-2xl font-bold text-gray-800">選擇您的生活圈層 <span class="text-sm font-normal text-gray-500">(選擇後即完成個人檔案建立)</span></h2>
+                    <button class="back-btn" id="closeCircleSelect">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div id="circleList"></div>
+                </div>
+                <div class="modal-footer p-4 border-t">
+                    <button id="confirmCircleSelect" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg">確認並加入</button>
+                </div>
+            `;
+            modal.classList.remove('hidden');
+            renderCircleList();
+        }
+
+        function renderCircleList(){
+            const container = document.getElementById('circleList');
+            if(!container) return;
+            const groups = {};
+            BUILTIN_CIRCLES.forEach(c=>{
+                if(!groups[c.category_group]) groups[c.category_group] = [];
+                groups[c.category_group].push(c);
+            });
+            const sortedCategories = Object.keys(groups).sort();
+            sortedCategories.forEach(cat=>{
+                const items = groups[cat];
+                const catDiv = document.createElement('div');
+                catDiv.className = 'circle-category';
+                catDiv.innerHTML = `<div class="category-title">${cat}</div>`;
+                items.forEach(item=>{
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'circle-item';
+                    itemDiv.innerHTML = `
+                        <input type="radio" name="circle-select" value="${item.circle_code}">
+                        <span class="circle-code">${item.circle_code}</span>
+                        <span class="circle-name">${item.display_name_zh || item.circle_code}</span>
+                    `;
+                    catDiv.appendChild(itemDiv);
+                });
+                container.appendChild(catDiv);
+            });
+        }
+
+        function onCircleSelectChange(e){
+            const selected = e.target.value;
+            const item = e.target.closest('.circle-item');
+            document.querySelectorAll('.circle-item').forEach(el=>el.classList.remove('selected'));
+            if(item) item.classList.add('selected');
+        }
+
+        async function confirmCircleSelect(){
+            const selected = document.querySelector('input[name="circle-select"]:checked');
+            if(!selected){ alert('請選擇一個生活圈層'); return; }
+            const circleCode = selected.value;
+
+            if(!state.currentUser){ alert('尚未登入'); return; }
+            if(!sbClient){ alert('系統錯誤：Supabase 連線失敗'); return; }
+
+            try{
+                const {error} = await sbClient.from('users_profile').upsert({
+                    id: state.currentUser.id,
+                    nickname: state.currentProfile?.nickname || '新會員',
+                    avatar_url: state.currentProfile?.avatar_url ||
+                        `https://api.dicebear.com/7.x/notionists/svg?seed=${state.currentUser.id}`,
+                    iso_country_code: 'TW',
+                    current_city: 'Taichung',
+                    home_circle: circleCode,
+                    free_meet_quota: 3,
+                    created_at: new Date().toISOString()
+                });
+
+                if(error){
+                    console.error('建立 users_profile 失敗:', error.message);
+                    alert('個人檔案建立失敗：' + error.message);
+                    return;
+                }
+
+                // 關閉彈窗
+                document.getElementById('circleSelectModal').classList.add('hidden');
+                document.getElementById('circleSelectModal').innerHTML = '';
+                state.currentProfile = { id: state.currentUser.id, home_circle: circleCode };
+                await loadProfileData();
+                await loadProfileCards();
+                showAppView();
+                alert('歡迎來到台中跑咖！您的圈層已設定成功。');
+            }catch(e){
+                alert('發生錯誤：' + e.message);
+                console.error('confirmCircleSelect 錯誤:', e);
             }
         }
     </script>
