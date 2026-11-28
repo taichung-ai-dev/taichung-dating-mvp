@@ -1077,9 +1077,10 @@
         async function onGoogleLogin(){
             if(!sbClient){ alert('尚未載入 Supabase SDK，請稍後再試'); return; }
             try{
+                // 導向到 GitHub Pages 端點，以便 Supabase OAuth callback 可以正常回傳
                 const {data,error} = await sbClient.auth.signInWithOAuth({
                     provider: 'google',
-                    options: { redirectTo: window.location.origin + window.location.pathname }
+                    options: { redirectTo: 'https://taichung-ai-dev.github.io/taichung-dating-mvp/' }
                 });
                 if(error){ alert('Google 登入失敗：' + error.message); }
             }catch(e){ alert('Google 登入失敗：' + e.message); }
@@ -1090,7 +1091,7 @@
             try{
                 const {data,error} = await sbClient.auth.signInWithOAuth({
                     provider: 'facebook',
-                    options: { redirectTo: window.location.origin + window.location.pathname }
+                    options: { redirectTo: 'https://taichung-ai-dev.github.io/taichung-dating-mvp/' }
                 });
                 if(error){ alert('Facebook 登入失敗：' + error.message); }
             }catch(e){ alert('Facebook 登入失敗：' + e.message); }
