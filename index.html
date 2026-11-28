@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>台中週末跑咖 - 戶外配對交友</title>
+    <title>圈圈 CircleMatch｜垂直生活圈與一生摯友社交平台</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
@@ -16,9 +16,9 @@
         .card-hover:hover{ box-shadow:0 8px 24px rgba(0,0,0,.12); transform:translateY(-4px); }
         .btn-primary{ background-color:var(--primary); color:#fff; transition:all .2s; }
         .btn-primary:hover{ background-color:var(--primary-hover); transform:translateY(-1px); }
-        .btn-google{ background-color:#fff; border:1px solid #ddd; color:#333; transition:all .2s; }
+        .btn-google{ background-color:#fff; border:1px solid #ddd; color:#333; transition:all .2s; white-space:nowrap; display:inline-flex; align-items:center; gap:8px; }
         .btn-google:hover{ background:#f8f9fa; border-color:#ccc; }
-        .btn-facebook{ background-color:#1877F2; color:#fff; transition:all .2s; }
+        .btn-facebook{ background-color:#1877F2; color:#fff; transition:all .2s; white-space:nowrap; display:inline-flex; align-items:center; gap:8px; }
         .btn-facebook:hover{ background:#0d66c3; }
         .modal-overlay{ background:rgba(0,0,0,.5); backdrop-filter:blur(4px); }
         .avatar-ring{ width:80px; height:80px; border-radius:50%; border:4px solid var(--primary); object-fit:cover; }
@@ -54,7 +54,7 @@
         .circle-group-header{ font-weight:700; color:#1f2937; padding:8px 12px; background:#f0fdf4; border:1px solid #86efac; border-radius:8px; cursor:pointer; }
         .select-option{ padding:10px 16px; font-size:1rem; }
 
-        /* 圈層選擇彈窗樣式 */
+        /* 圈層選擇彈窗 */
         #circleSelectModal { backdrop-filter:blur(8px); background:rgba(255,255,255,.95); }
         #circleSelectModal .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #e5e7eb; }
         #circleSelectModal .modal-body { padding: 20px; max-height: 60vh; overflow-y: auto; }
@@ -66,8 +66,6 @@
         .circle-item .circle-code { font-size: .85rem; color: #6b7280; font-family: monospace; }
         .circle-item .circle-name { font-weight: 600; }
         .circle-item input[type="radio"] { width: 18px; height: 18px; accent-color: #10b981; }
-
-        /* 返回按鈕 */
         .back-btn { background: none; border: none; color: #6b7280; cursor: pointer; padding: 8px 16px; border-radius: 8px; transition: all 0.2s; }
         .back-btn:hover { color: #1f2937; background: #f3f4f6; }
     </style>
@@ -79,7 +77,7 @@
         <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center space-x-2">
                 <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                <span class="text-xl font-bold text-green-700">台中跑咖</span>
+                <span class="text-xl font-bold text-blue-600">圈圈 CircleMatch</span>
             </div>
             <div class="flex items-center space-x-3">
                 <button id="guestBtn" class="text-gray-600 hover:text-gray-800 font-medium">訪客體驗</button>
@@ -101,11 +99,11 @@
             <div class="flex gap-4 mb-6">
                 <button id="googleLoginBtn" class="btn-google flex-1 flex items-center justify-center gap-2 py-3 rounded-lg">
                     <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c1.87-2.12 2.9-5.33 2.9-8.83z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.48-.79-.74-1.69-.74-2.63s.26-1.84.74-2.63l3.57-2.77c1.87.79 4.05 1.26 6.16 1.26 3.59 0 6.64-2.06 7.67-4.92L13 6.39l-3.57 2.77z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 15.13 1 12 1 7.7 1 3.99 3.47 2.18 7.23l3.57 2.77c.87-2.6 3.28-4.53 6.16-4.53z"/></svg>
-                    使用 Google 帳號繼續
+                    Google 登入
                 </button>
                 <button id="facebookLoginBtn" class="btn-facebook flex-1 flex items-center justify-center gap-2 py-3 rounded-lg">
                     <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c1.87-2.12 2.9-5.33 2.9-8.83z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.48-.79-.74-1.69-.74-2.63s.26-1.84.74-2.63l3.57-2.77c1.87.79 4.05 1.26 6.16 1.26 3.59 0 6.64-2.06 7.67-4.92L13 6.39l-3.57 2.77z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 15.13 1 12 1 7.7 1 3.99 3.47 2.18 7.23l3.57 2.77c.87-2.6 3.28-4.53 6.16-4.53z"/></svg>
-                    使用 Facebook 帳號繼續
+                    Facebook 登入
                 </button>
             </div>
 
@@ -161,11 +159,10 @@
     <div id="circleSelectModal" class="modal-overlay fixed inset-0 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-2xl w-full max-w-3xl h-4/5 flex flex-col shadow-2xl slide-in">
             <div class="modal-header">
-                <h2 class="text-2xl font-bold text-gray-800">選擇您的生活圈層</h2>
+                <h2 class="text-2xl font-bold text-gray-800">選擇您的生活圈層 <span class="text-sm font-normal text-gray-500">(選擇後即完成個人檔案建立)</span></h2>
                 <button class="back-btn" id="closeCircleSelect">&times;</button>
             </div>
             <div class="modal-body">
-                <!-- 圈層選項將由 JS 動態填入 -->
                 <div id="circleList"></div>
             </div>
             <div class="modal-footer p-4 border-t">
@@ -177,8 +174,8 @@
     <!-- 訪客體驗 -->
     <main id="guestView" class="max-w-7xl mx-auto px-4 py-8">
         <div class="text-center py-12">
-            <h1 class="text-5xl font-bold text-gray-800 mb-4">歡迎來到台中跑咖 🏃‍♂️</h1>
-            <p class="text-xl text-gray-600 mb-8">探索湖旁山區與老街好去處，一起找到你的跑友、尋伴與新朋友</p>
+            <h1 class="text-5xl font-bold text-blue-600 mb-4">歡迎來到圈圈 CircleMatch</h1>
+            <p class="text-xl text-gray-600 mb-8">按職業、作息與生活品味分圈，找到最懂你的人生戰友與靈魂伴侶</p>
             <button id="startExploring" class="bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-xl text-xl transition transform hover:scale-105">開始自由體驗</button>
         </div>
         <div>
@@ -309,40 +306,33 @@
             oauthLoginComplete: false
         };
 
-        // ─── 30 個圈層內建備援清單（本地備援）───
-        // 依照 category_group 分組，共 30 個圈層
+        // ─── 30 個圈層內建備援清單（本地備援，優先渲染）───
         const BUILTIN_CIRCLES = [
-            // 【銀髮樂齡館 - Senior】
             { circle_code:'SENIOR_GOLD', category_group:'銀髮樂齡館', display_name_zh: '樂齡黃昏青春圈', display_name_en:'Golden Senior Circle' },
             { circle_code:'SENIOR_CRAFT', category_group:'銀髮樂齡館', display_name_zh: '銀髮工藝圈', display_name_en:'Craft Seniors' },
             { circle_code:'SENIOR_FIT', category_group:'銀髮樂齡館', display_name_zh: '銀髮運動圈', display_name_en:'Active Seniors' },
             { circle_code:'SENIOR_GARDEN', category_group:'銀髮樂齡館', display_name_zh: '銀髮園藝圈', display_name_en:'Garden Seniors' },
             { circle_code:'SENIOR_SOCIETY', category_group:'銀髮樂齡館', display_name_zh: '銀髮友善圈', display_name_en:'Senior Friendship' },
-            // 【校園新手館 - Campus】
             { circle_code:'UNI_ROOKIE', category_group:'校園新手館', display_name_zh: '校園戀愛新手村', display_name_en:'Campus Rookies' },
             { circle_code:'UNI_PARTY', category_group:'校園新手館', display_name_zh: '校園派對社', display_name_en:'Campus Party' },
             { circle_code:'UNI_STUDY', category_group:'校園新手館', display_name_zh: '校園學習部', display_name_en:'Study Club' },
             { circle_code:'UNI_ART', category_group:'校園新手館', display_name_zh: '校園文藝社', display_name_en:'Campus Arts' },
             { circle_code:'UNI_SPORTS', category_group:'校園新手館', display_name_zh: '校園運動社', display_name_en:'Campus Sports' },
-            // 【高壓精英館 - Career】
             { circle_code:'TECH_DEV', category_group:'高壓精英館', display_name_zh: '科技爆肝研發圈', display_name_en:'Tech & R&D Engineers' },
             { circle_code:'TECH_SALES', category_group:'高壓精英館', display_name_zh: '科技行銷圈', display_name_en:'Tech Marketing' },
             { circle_code:'MED_SHIFT', category_group:'高壓精英館', display_name_zh: '輪班制白衣天使', display_name_en:'Shift Medical Angels' },
             { circle_code:'MED_ADMIN', category_group:'高壓精英館', display_name_zh: '醫療行政圈', display_name_en:'Medical Admin' },
             { circle_code:'FINANCE_TECH', category_group:'高壓精英館', display_name_zh: '金融科技圈', display_name_en:'FinTech Hub' },
-            // 【生活共鳴館 - Hobby】
             { circle_code:'ACG_CORE', category_group:'生活共鳴館', display_name_zh: '硬核二次元同好圈', display_name_en:'Anime & Gaming Core' },
             { circle_code:'FOODIE', category_group:'生活共鳴館', display_name_zh: '美食探索者', display_name_en:'Food Explorer' },
             { circle_code:'TRAVELER', category_group:'生活共鳴館', display_name_zh: '自由旅行者', display_name_en:'Traveler' },
             { circle_code:'CARLIFE', category_group:'生活共鳴館', display_name_zh: '車輪人生', display_name_en:'Car Life' },
             { circle_code:'BOOKWORM', category_group:'生活共鳴館', display_name_zh: '書劫鐵匠', display_name_en:'Bookworm' },
-            // 【特殊地理館 - Special】
             { circle_code:'POLAR_BEACON', category_group:'特殊地理館', display_name_zh: '極地孤獨燈塔圈', display_name_en:'Polar Expedition Beacon' },
             { circle_code:'KR_OPTIN', category_group:'特殊地理館', display_name_zh: '朝鮮安全池', display_name_en:'Korea Safe Pool' },
             { circle_code:'GLOBAL_ANON', category_group:'特殊地理館', display_name_zh: '匿名保護池', display_name_en:'Global Anonymity Pool' },
             { circle_code:'CN_OPEN', category_group:'特殊地理館', display_name_zh: '大陸開放池', display_name_en:'China Open Pool' },
             { circle_code:'SEA_SHARED', category_group:'特殊地理館', display_name_zh: '海域交流池', display_name_en:'Sea Shared Pool' },
-            // 【創作者社群】
             { circle_code:'CREATOR', category_group:'創作者社群', display_name_zh: '創作者社群', display_name_en:'Creator Community' },
             { circle_code:'VOLUNTEER', category_group:'創作者社群', display_name_zh: '志工輪迴', display_name_en:'Volunteer Rotation' },
             { circle_code:'MOVIE_BAUD', category_group:'創作者社群', display_name_zh: '影音劇迷圈', display_name_en:'Movie & Poetry' },
@@ -350,27 +340,24 @@
             { circle_code:'BREAKFAST_CLUB', category_group:'創作者社群', display_name_zh: '早餐與美食俱樂部', display_name_en:'Breakfast Club' }
         ];
 
-        // ─── 初始化 (防止 RLS 報錯) ─────────────────────────────
+        // ─── 初始化 (修正: 移除所有 alert，訪客模式絕不跳彈窗) ──
         document.addEventListener('DOMContentLoaded',async()=>{
             try{
                 await initSupabase();
                 setupEventListeners();
                 showGuestView();
-                await loadCircles();
+                await loadCircles();  // 直接渲染 30 個圈層（本地備援），後續再同步
+                // 訪客模式：不讀取任何需要登入權限的資料表
                 if(state.currentUser){
                     await loadRoleData();
                     await refreshApp();
                 } else {
                     renderRoleCards(demoProfiles);
+                    console.warn('（訪客模式）未登入，使用內建示範角色渲染首頁卡片');
                 }
                 console.log('✅ MVP 初始化完成');
             }catch(err){
-                if(err && err.message && err.message.includes('users_profile')){
-                    console.warn('（訪客模式）忽略 users_profile 讀取錯誤:', err.message);
-                } else {
-                    console.error('❌ MVP 初始化失敗:', err);
-                    alert('系統初始化失敗，請重新整理頁面');
-                }
+                console.error('❌ MVP 初始化失敗:', err);
             }
         });
 
@@ -384,7 +371,6 @@
                     document.querySelectorAll('.modal-overlay:not(#postsModal):not(#circleSelectModal)').forEach(m=>m.classList.add('hidden'));
                 }
             });
-            // 通用按鈕
             document.getElementById('guestBtn')?.addEventListener('click',()=>{ state.isGuestMode=true; showGuestView(); });
             document.getElementById('loginBtn')?.addEventListener('click',()=>{ showAuth('login'); });
             document.getElementById('signupBtn')?.addEventListener('click',()=>{ showAuth('signup'); });
@@ -447,6 +433,7 @@
             document.getElementById('closeCircleSelect')?.addEventListener('click',()=>{
                 document.getElementById('circleSelectModal').classList.add('hidden');
                 document.getElementById('circleSelectModal').innerHTML = '<div class="modal-header"><h2 class="text-2xl font-bold text-gray-800">選擇您的生活圈層</h2><button class="back-btn" id="closeCircleSelect2">&times;</button></div><div id="circleList"></div>';
+                renderCircleList();
             });
         }
 
@@ -492,52 +479,19 @@
             showGuestView();
         }
 
-        // ─── 圈層載入 ───────────────────────────────────────────
+        // ─── 生活圈層渲染（優先用本地 30 個備援，後續同步 Supabase）───
         async function loadCircles(){
             const select = document.getElementById('circleSelect');
-            if(!sbClient) return;
-            try{
-                const {data,error} = await sbClient.from('circles_master').select('circle_code,category_group,display_name');
-                if(error){ console.warn('載入圈層失敗，將使用內建備援:', error.message); }
-                else if(data && data.length > 0){
-                    // 由 Supabase 資料填充
-                    select.innerHTML = '<option value="">—— 請選擇生活圈層 ——</option>';
-                    const groups = {};
-                    (data||[]).forEach(c=>{
-                        const cat = c.category_group || '其他';
-                        if(!groups[cat]) groups[cat] = [];
-                        groups[cat].push({
-                            circle_code: c.circle_code,
-                            category_group: cat,
-                            name: c.display_name?.zh_TW || c.display_name?.zh || c.circle_code
-                        });
-                    });
-                    // 按 category_group 分組
-                    const sortedCategories = Object.keys(groups).sort();
-                    sortedCategories.forEach(cat=>{
-                        const items = groups[cat];
-                        const optGroup = document.createElement('optgroup');
-                        optGroup.label = cat;
-                        items.forEach(item=>{
-                            const opt = document.createElement('option');
-                            opt.value = item.circle_code;
-                            opt.textContent = item.name || item.circle_code;
-                            optGroup.appendChild(opt);
-                        });
-                        select.appendChild(optGroup);
-                    });
-                    return;
-                }
-            }catch(err){ console.warn('圈層載入錯誤（降級為內建備援）:', err.message); }
+            if(!select) return;
 
-            // 內建備援：30 個圈層
-            select.innerHTML = '<option value="">—— 請選擇生活圈層 ——</option>';
+            // 1. 直接用本地 30 個備援渲染（100% 保證有選項）
             const groups = {};
             BUILTIN_CIRCLES.forEach(c=>{
                 if(!groups[c.category_group]) groups[c.category_group] = [];
                 groups[c.category_group].push(c);
             });
             const sortedCategories = Object.keys(groups).sort();
+            select.innerHTML = '<option value="">—— 請選擇生活圈層 ——</option>';
             sortedCategories.forEach(cat=>{
                 const items = groups[cat];
                 const optGroup = document.createElement('optgroup');
@@ -550,6 +504,47 @@
                 });
                 select.appendChild(optGroup);
             });
+
+            // 2. 若 Supabase 可用，成功後動態同步更新
+            if(sbClient){
+                try{
+                    const {data,error} = await sbClient.from('circles_master').select('circle_code,category_group,display_name');
+                    if(!error && data && data.length > 0){
+                        console.log('✅ 成功從 Supabase 同步圈層清單，覆蓋本地備援');
+                        const updatedGroups = {};
+                        (data||[]).forEach(c=>{
+                            const cat = c.category_group || '其他';
+                            if(!updatedGroups[cat]) updatedGroups[cat] = [];
+                            updatedGroups[cat].push({
+                                circle_code: c.circle_code,
+                                category_group: cat,
+                                display_name_zh: c.display_name?.zh_TW || c.display_name?.zh || c.circle_code
+                            });
+                        });
+                        // 清空後重新填入
+                        const newSelect = document.createElement('select');
+                        newSelect.id = 'circleSelect';
+                        newSelect.className = 'dropdown-select w-full border border-gray-300 rounded-lg px-4 py-3';
+                        newSelect.innerHTML = '<option value="">—— 請選擇生活圈層 ——</option>';
+                        const sortedCats = Object.keys(updatedGroups).sort();
+                        sortedCats.forEach(cat=>{
+                            const optGroup = document.createElement('optgroup');
+                            optGroup.label = cat;
+                            (updatedGroups[cat]||[]).forEach(item=>{
+                                const opt = document.createElement('option');
+                                opt.value = item.circle_code;
+                                opt.textContent = item.display_name_zh || item.circle_code;
+                                optGroup.appendChild(opt);
+                            });
+                            select.appendChild(optGroup);
+                        });
+                        // 替換原 select
+                        select.parentNode.replaceChild(newSelect, select);
+                    }
+                }catch(err){
+                    console.warn('圈層同步失敗（使用本地備援）：', err.message);
+                }
+            }
         }
 
         // ─── 角色數據 ───────────────────────────────────────────
@@ -977,7 +972,7 @@
             const nickname = document.getElementById('nicknameInput').value.trim();
             const circle = document.getElementById('circleSelect').value;
 
-            // 驗證：密碼一致性
+            // 密碼一致性
             if(mode==='signup' && password !== passwordConfirm){
                 const errEl = document.getElementById('passwordError');
                 errEl.classList.remove('hidden');
@@ -985,14 +980,14 @@
                 document.getElementById('passwordConfirm').focus();
                 return;
             }
-            // 驗證：暱稱
+            // 暱稱
             if(!nickname){
                 document.getElementById('formError').textContent = '⚠️ 請輸入暱稱';
                 document.getElementById('formError').classList.remove('hidden');
                 document.getElementById('nicknameInput').focus();
                 return;
             }
-            // 驗證：生活圈層必選
+            // 生活圈層必選
             if(!circle){
                 document.getElementById('formError').textContent = '⚠️ 生活圈層為必填項目';
                 document.getElementById('formError').classList.remove('hidden');
@@ -1011,7 +1006,6 @@
                     const {data,error} = await sbClient.auth.signUp({email,password});
                     if(error) throw error;
 
-                    // 寫入 users_profile（僅實際存在的欄位）
                     const profileInsert = {
                         id: data.user.id,
                         nickname: nickname,
@@ -1139,7 +1133,7 @@
                 const {error} = await sbClient.from('users_profile').upsert({
                     id: state.currentUser.id,
                     nickname: state.currentProfile?.nickname || '新會員',
-                    avatar_url: state.currentProfile?.avatar_url ||
+                    avater_url: state.currentProfile?.avater_url ||
                         `https://api.dicebear.com/7.x/notionists/svg?seed=${state.currentUser.id}`,
                     iso_country_code: 'TW',
                     current_city: 'Taichung',
@@ -1154,14 +1148,13 @@
                     return;
                 }
 
-                // 關閉彈窗
                 document.getElementById('circleSelectModal').classList.add('hidden');
                 document.getElementById('circleSelectModal').innerHTML = '';
                 state.currentProfile = { id: state.currentUser.id, home_circle: circleCode };
                 await loadProfileData();
                 await loadProfileCards();
                 showAppView();
-                alert('歡迎來到台中跑咖！您的圈層已設定成功。');
+                alert('歡迎來到圈圈 CircleMatch！您的圈層已設定成功。');
             }catch(e){
                 alert('發生錯誤：' + e.message);
                 console.error('confirmCircleSelect 錯誤:', e);
